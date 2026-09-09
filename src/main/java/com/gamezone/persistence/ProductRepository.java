@@ -119,7 +119,8 @@ public class ProductRepository {
             String brand = fields[5];
             String model = fields[6];
             String generation = fields[7];
-            return new Console(id, price, stock, title, brand, model, generation);
+        
+            return new Console(id, price, stock, title, brand, generation, model);
         }
         throw new IllegalArgumentException("Unknown product type in file: " + type);
     }

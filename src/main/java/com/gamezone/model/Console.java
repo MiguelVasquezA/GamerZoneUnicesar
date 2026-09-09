@@ -2,7 +2,7 @@ package com.gamezone.model;
 
 /**
  * Represents a video game console in the store.
- * @author Miguel Vasquez
+ * @author FC Evento
  * @version 1.0
  */
 

@@ -5,7 +5,7 @@ package com.gamezone.model;
  * This is an abstract base class containing common attributes and behaviors
  * for all commercialized products.
  *
- * @author Miguel Vasquez
+ * @author FC Evento
  * @version 1.0
  */
 

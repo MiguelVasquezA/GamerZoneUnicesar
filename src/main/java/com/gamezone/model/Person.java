@@ -36,22 +36,46 @@ public abstract class Person  implements Serializable {
         return name;
     }
 
+    /**
+     * sets or updates the person's name
+     *  @param name the new full name to set
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * returns the person's identification number
+     *
+     * @return
+     */
     public String getIdentification() {
         return identification;
     }
 
+    /**
+     * sets or updates the person's identification number
+     *
+     * @param identification
+     */
     public void setIdentification(String identification) {
         this.identification = identification;
     }
 
+    /**
+     * returns the person's contact phone number
+     *
+     * @return
+     */
     public String getPhoneNumber() {
         return phoneNumber;
     }
 
+    /**
+     * sets or updates the person's contact phone number
+     *
+     * @param phoneNumber
+     */
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }

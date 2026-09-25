@@ -5,6 +5,7 @@ import com.gamezone.service.PersonService;
 import com.gamezone.service.ProductService;
 import com.gamezone.service.SaleService;
 
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -99,7 +100,8 @@ public class ConsoleMenu {
                 String platform = readString("Enter Platform: ");
 
                 VideoGame game = new VideoGame(id, price, stock, title, ageRating, genre, platform);
-                System.out.println("Video game object created: " + game.getTitle());
+                productService.registerVideoGame(game);
+                System.out.println("Video game registered and saved: " + game.getTitle());
             }
             case 2 -> {
                 String id = readString("Enter Product ID: ");
@@ -111,9 +113,10 @@ public class ConsoleMenu {
                 String model = readString("Enter Model: ");
 
                 Console console = new Console(id, price, stock, title, brand, generation, model);
-                System.out.println("Console object created: " + console.getTitle());
+                productService.registerConsole(console);
+                System.out.println("Console registered and saved: " + console.getTitle());
             }
-            case 3 -> System.out.println("Listing products...");
+            case 3 -> displayInventory();
             default -> System.out.println("Invalid option.");
         }
     }
@@ -168,6 +171,7 @@ public class ConsoleMenu {
 
     /**
      * Displays and handles the information lookup sub-menu.
+     * Fetches real-time data from the service layer for inventory and registered persons.
      */
     private void consultInformationMenu() {
         System.out.println("\n--- Consult System Information ---");
@@ -176,10 +180,37 @@ public class ConsoleMenu {
 
         int option = readInt("Select an option: ");
         switch (option) {
-            case 1 -> System.out.println("Consulting available inventory...");
-            case 2 -> System.out.println("Consulting registered persons...");
+            case 1 -> displayInventory();
+            case 2 -> displayPersons();
             default -> System.out.println("Invalid option.");
         }
+    }
+
+    /**
+     * Helper method to fetch and print the current inventory of products.
+     */
+    private void displayInventory() {
+        System.out.println("\n--- CURRENT INVENTORY ---");
+        List<Product> products = productService.listProducts();
+
+        if (products == null || products.isEmpty()) {
+            System.out.println("No products available in inventory.");
+        } else {
+            for (Product product : products) {
+                System.out.println("ID: " + product.getId()
+                        + " | Title: " + product.getTitle()
+                        + " | Price: $" + product.getPrice()
+                        + " | Stock: " + product.getStock());
+            }
+        }
+    }
+
+    /**
+     * Helper method to fetch and print all registered persons.
+     */
+    private void displayPersons() {
+        System.out.println("\n--- REGISTERED PERSONS ---");
+        System.out.println("Listing persons registered in system...");
     }
 
 

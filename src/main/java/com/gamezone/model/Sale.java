@@ -45,7 +45,7 @@ public class Sale implements Serializable{
      * @return the total price of the sale
      */
 
-    private double calculateTotal(){
+    public double calculateTotal(){
         double total = 0.0;
         if (products != null){
             for (Product p: products){

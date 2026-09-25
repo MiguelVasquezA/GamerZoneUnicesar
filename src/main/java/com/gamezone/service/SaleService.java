@@ -79,7 +79,7 @@ public class SaleService {
     public List<Sale> getSalesBySeller(String sellerId) {
         List<Sale> sellerSales = new ArrayList<>();
         for (Sale sale : sales) {
-            if (sale.getSeller() != null && sale.getSeller().getId().equalsIgnoreCase(sellerId)) {
+            if (sale.getSeller() != null && sale.getSeller().equalsIgnoreCase(sellerId)) {
                 sellerSales.add(sale);
             }
         }
@@ -95,7 +95,7 @@ public class SaleService {
     public List<Sale> getSalesByCustomer(String customerId) {
         List<Sale> customerSales = new ArrayList<>();
         for (Sale sale : sales) {
-            if (sale.getCustomer() != null && sale.getCustomer().getId().equalsIgnoreCase(customerId)) {
+            if (sale.getClient() != null && sale.getClient().equalsIgnoreCase(customerId)) {
                 customerSales.add(sale);
             }
         }

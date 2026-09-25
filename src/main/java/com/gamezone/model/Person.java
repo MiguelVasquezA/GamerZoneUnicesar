@@ -47,7 +47,7 @@ public abstract class Person  implements Serializable {
     /**
      * returns the person's identification number
      *
-     * @return
+     * @return the identification number of the person
      */
     public String getIdentification() {
         return identification;
@@ -56,7 +56,7 @@ public abstract class Person  implements Serializable {
     /**
      * sets or updates the person's identification number
      *
-     * @param identification
+     * @param identification  the new identification number to set
      */
     public void setIdentification(String identification) {
         this.identification = identification;
@@ -65,7 +65,7 @@ public abstract class Person  implements Serializable {
     /**
      * returns the person's contact phone number
      *
-     * @return
+     * @return the phone number of the person
      */
     public String getPhoneNumber() {
         return phoneNumber;
@@ -74,7 +74,7 @@ public abstract class Person  implements Serializable {
     /**
      * sets or updates the person's contact phone number
      *
-     * @param phoneNumber
+     * @param phoneNumber the new phone number to set
      */
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;

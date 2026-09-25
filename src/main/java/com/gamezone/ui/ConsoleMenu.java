@@ -8,15 +8,33 @@ import com.gamezone.service.SaleService;
 import java.util.Scanner;
 
 /**
- * Console user interface for managing the GamerZone system.
+ * Console user interface class responsible for handling application menus,
+ * reading user inputs, and interacting exclusively with the service layer.
+ *
+ * @author Miguel Vasquez
+ * @version 1.0
  */
 public class ConsoleMenu {
 
+    /** Service layer instance for managing products. */
     private final ProductService productService;
+
+    /** Service layer instance for managing persons. */
     private final PersonService personService;
+
+    /** Service layer instance for managing sales. */
     private final SaleService saleService;
+
+    /** Scanner instance for reading input from the standard console. */
     private final Scanner scanner;
 
+    /**
+     * Constructs a ConsoleMenu instance with the required services.
+     *
+     * @param productService service handling product operations
+     * @param personService  service handling person operations
+     * @param saleService    service handling sale operations
+     */
     public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService) {
         this.productService = productService;
         this.personService = personService;
@@ -24,6 +42,9 @@ public class ConsoleMenu {
         this.scanner = new Scanner(System.in);
     }
 
+    /**
+     * Starts the interactive console menu loop for the application.
+     */
     public void start() {
         boolean exit = false;
         while (!exit) {
@@ -43,6 +64,9 @@ public class ConsoleMenu {
         }
     }
 
+    /**
+     * Prints the main system menu options to the console.
+     */
     private void printMainMenu() {
         System.out.println("\n========== GAMERZONE UNICESAR ==========");
         System.out.println("1. Product Management");
@@ -53,9 +77,10 @@ public class ConsoleMenu {
         System.out.println("=======================================");
     }
 
-    // ----------------------------------------------------
-    // 1. PRODUCT MANAGEMENT
-    // ----------------------------------------------------
+
+    /**
+     * Displays and handles the product management sub-menu.
+     */
     private void manageProductsMenu() {
         System.out.println("\n--- Product Management ---");
         System.out.println("1. Add Video Game");
@@ -73,7 +98,6 @@ public class ConsoleMenu {
                 String genre = readString("Enter Genre: ");
                 String platform = readString("Enter Platform: ");
 
-                // Firma exacta en VideoGame.java: (id, price, stock, title, ageRating, genre, platform)
                 VideoGame game = new VideoGame(id, price, stock, title, ageRating, genre, platform);
                 System.out.println("Video game object created: " + game.getTitle());
             }
@@ -94,9 +118,10 @@ public class ConsoleMenu {
         }
     }
 
-    // ----------------------------------------------------
-    // 2. PERSON MANAGEMENT
-    // ----------------------------------------------------
+
+    /**
+     * Displays and handles the person management sub-menu.
+     */
     private void managePersonsMenu() {
         System.out.println("\n--- Person Management ---");
         System.out.println("1. Register Customer");
@@ -129,9 +154,10 @@ public class ConsoleMenu {
         }
     }
 
-    // ----------------------------------------------------
-    // 3. REGISTER SALE
-    // ----------------------------------------------------
+
+    /**
+     * Displays and handles the sale registration flow.
+     */
     private void registerSale() {
         System.out.println("\n--- Register New Sale ---");
         String customerIdCard = readString("Enter Customer ID Card: ");
@@ -139,9 +165,10 @@ public class ConsoleMenu {
         System.out.println("Registering sale for customer ID: " + customerIdCard + " with seller ID: " + sellerIdCard);
     }
 
-    // ----------------------------------------------------
-    // 4. CONSULT INFORMATION
-    // ----------------------------------------------------
+
+    /**
+     * Displays and handles the information lookup sub-menu.
+     */
     private void consultInformationMenu() {
         System.out.println("\n--- Consult System Information ---");
         System.out.println("1. View Available Inventory");
@@ -155,14 +182,24 @@ public class ConsoleMenu {
         }
     }
 
-    // ----------------------------------------------------
-    // HELPER METHODS FOR INPUT READING
-    // ----------------------------------------------------
+
+    /**
+     * Reads a line of text input from the user.
+     *
+     * @param prompt message displayed to prompt the user
+     * @return trimmed text entered by the user
+     */
     private String readString(String prompt) {
         System.out.print(prompt);
         return scanner.nextLine().trim();
     }
 
+    /**
+     * Reads an integer value from the user, retrying upon invalid input.
+     *
+     * @param prompt message displayed to prompt the user
+     * @return valid integer entered by the user
+     */
     private int readInt(String prompt) {
         while (true) {
             try {
@@ -174,6 +211,12 @@ public class ConsoleMenu {
         }
     }
 
+    /**
+     * Reads a double/floating point value from the user, retrying upon invalid input.
+     *
+     * @param prompt message displayed to prompt the user
+     * @return valid double value entered by the user
+     */
     private double readDouble(String prompt) {
         while (true) {
             try {

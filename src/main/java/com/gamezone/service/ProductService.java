@@ -74,13 +74,26 @@ public class ProductService {
     }
 
     /**
+     * Updates the stock quantity of a specific product and persists the changes.
+     * @param id the product id to update
+     * @param newStock the new stock quantity
+     */
+    public void updateStock(String id, int newStock) {
+        findById(id).ifPresent(product -> {
+            product.setStock(newStock);
+            repository.save(products);
+        });
+    }
+
+    /**
      * Reduces the stock of a product by the given quantity and persists the change.
      * @param id the product id whose stock will be reduced
      * @param quantity the quantity to subtract from the current stock
      */
     public void reduceStock(String id, int quantity) {
         findById(id).ifPresent(product -> {
-            product.setStock(product.getStock() - quantity);
+            int updatedStock = Math.max(0, product.getStock() - quantity);
+            product.setStock(updatedStock);
             repository.save(products);
         });
     }

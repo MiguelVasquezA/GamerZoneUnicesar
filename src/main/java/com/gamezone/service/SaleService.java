@@ -1,104 +1,93 @@
 package com.gamezone.service;
 
+import  com.gamezone.model.Accessory;
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
 import com.gamezone.persistence.SaleRepository;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Service class responsible for handling business logic related to sales,
- * including stock validation, total calculation, and sale persistence.
- *
- * @author Miguel Vasquez
- * @version 1.0
+ * Service class responsible for managing sale transactions and inventory updates.
+ * Handle sales for both standard products and accessories.
  */
-public class SaleService {
 
+public class SaleService{
+    private final ProductService productService;
+    private final AccessoryService accessoryService;
     private final SaleRepository saleRepository;
-    private final List<Sale> sales;
 
     /**
-     * Constructs a SaleService with a specified repository.
+     * Constructs a new SaleService with necessary dependencies.
      *
-     * @param saleRepository the repository used for persisting sales
+     * @param productService service for managing general product inventory.
+     * @param accessoryService service for managing accessory inventory
+     * @param saleRepository repository for persisting sale records
      */
-    public SaleService(SaleRepository saleRepository) {
+    public SaleService(AccessoryService accessoryService, ProductService productService, SaleRepository saleRepository) {
+        this.accessoryService = accessoryService;
+        this.productService = productService;
         this.saleRepository = saleRepository;
-        this.sales = saleRepository.loadSales();
     }
 
     /**
-     * Registers a new sale after validating business constraints.
+     * Registers a new sale transaction, validates stock availability, and updates inventory.
      *
-     * @param sale the Sale object to be registered
-     * @return true if the sale was successfully registered, false otherwise
+     * @param products the list of products or accessories being purchased
+     * @param client the client who makes the purchase
+     * @param seller the vendor who processes the sale
+     * @return the processed {@link Sale} object
+     * @throws IllegalArgumentException if the items list is null or empty
+     * @throws IllegalStateException if any item in the sale does not have enough stock
      */
-    public boolean registerSale(Sale sale) {
-        if (sale == null || sale.getProducts() == null || sale.getProducts().isEmpty()) {
-            System.err.println("Error: A sale must contain at least one product.");
-            return false;
+    public Sale registerSale(String client, String seller, List<Product> products) {
+        if (products == null || products.isEmpty()) {
+            throw new IllegalArgumentException("Sale must contain at least one product.");
         }
 
-        // Validate stock for all products in the sale
-        for (Product product : sale.getProducts()) {
-            if (product.getStock() <= 0) {
-                System.err.println("Error: Insufficient stock for product: " + product.getTitle());
-                return false;
+
+        for (Product item : products) {
+            if (item.getStock() <= 0) {
+                throw new IllegalStateException("Item '" + item.getTitle() + "' is out of stock.");
             }
         }
 
-        // Deduct stock for each product
-        for (Product product : sale.getProducts()) {
-            product.setStock(product.getStock() - 1);
+        String saleId = "SALE-" + System.currentTimeMillis();
+        String date = java.time.LocalDate.now().toString();
+
+
+        double totalAmount = 0.0;
+        for (Product item : products) {
+            totalAmount += item.getPrice();
         }
 
-        // Calculate total and save sale
-        sale.calculateTotal();
+
+        Sale sale = new Sale(client, date, products, saleId, seller, totalAmount);
+
+
+        for (Product item : products) {
+            if (item instanceof Accessory) {
+                accessoryService.updateStock(item.getId(), item.getStock() - 1);
+            } else {
+                productService.updateStock(item.getId(), item.getStock() - 1);
+            }
+        }
+
+        List<Sale> sales = saleRepository.loadSales();
         sales.add(sale);
         saleRepository.saveSale(sales);
-        return true;
+
+        return sale;
     }
 
     /**
-     * Retrieves the entire history of registered sales.
+     * Retrieves all recorded sales from storage.
      *
-     * @return a list of all sales
+     * @return a list of all {@link Sale} instances
      */
-    public List<Sale> getAllSales() {
-        return new ArrayList<>(sales);
+    public List<Sale> listAllSales(){
+        return saleRepository.loadSales();
     }
 
-    /**
-     * Retrieves sales associated with a specific seller ID.
-     *
-     * @param sellerId the identification of the seller
-     * @return a list of sales handled by the specified seller
-     */
-    public List<Sale> getSalesBySeller(String sellerId) {
-        List<Sale> sellerSales = new ArrayList<>();
-        for (Sale sale : sales) {
-            if (sale.getSeller() != null && sale.getSeller().equalsIgnoreCase(sellerId)) {
-                sellerSales.add(sale);
-            }
-        }
-        return sellerSales;
-    }
-
-    /**
-     * Retrieves sales associated with a specific customer ID.
-     *
-     * @param customerId the identification of the customer
-     * @return a list of sales made by the specified customer
-     */
-    public List<Sale> getSalesByCustomer(String customerId) {
-        List<Sale> customerSales = new ArrayList<>();
-        for (Sale sale : sales) {
-            if (sale.getClient() != null && sale.getClient().equalsIgnoreCase(customerId)) {
-                customerSales.add(sale);
-            }
-        }
-        return customerSales;
-    }
 }

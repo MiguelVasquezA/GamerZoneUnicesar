@@ -1,44 +1,28 @@
 package com.gamezone.service;
 
-
-
-
 import com.gamezone.model.Person;
 import com.gamezone.persistence.PersonFileHandler;
 import java.util.List;
 
-
-
-public class PersonService {
-    private PersonFileHandler fileHandler;
-
 /**
- * provides business logic services for managing persons,
+ * Provides business logic services for managing persons,
  * coordinating operations between the data layer and application workflow.
  */
 public class PersonService {
+
     private PersonFileHandler fileHandler;
 
     /**
-     * creates a new person service with the specified file handler
+     * Creates a new person service with the specified file handler.
      *
      * @param fileHandler the file handler used for data persistence
      */
-
     public PersonService(PersonFileHandler fileHandler) {
         this.fileHandler = fileHandler;
     }
 
-
-    public void addPerson(Person person){
-        List<Person> persons = fileHandler.loadPersons();
-            persons.add(person);
-            fileHandler.savePersons(persons);
-    }
-
-
     /**
-     * adds a new person to the persistent storage list
+     * Adds a new person to the persistent storage list.
      *
      * @param person the person object to be added
      */
@@ -49,12 +33,11 @@ public class PersonService {
     }
 
     /**
-     * searches for a person by their identification number
+     * Searches for a person by their identification number.
      *
      * @param id the identification number to search for
      * @return the person object if found, or null otherwise
      */
-
     public Person searchPerson(String id) {
         List<Person> persons = fileHandler.loadPersons();
         for (Person p : persons) {
@@ -65,5 +48,4 @@ public class PersonService {
         return null;
     }
 }
-
 

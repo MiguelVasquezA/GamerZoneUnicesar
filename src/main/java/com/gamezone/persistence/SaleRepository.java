@@ -2,6 +2,7 @@ package com.gamezone.persistence;
 
 import com.gamezone.model.Sale;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,10 +51,17 @@ public class SaleRepository {
     @SuppressWarnings("unchecked")
     public List<Sale> loadSales() {
         List<Sale> sales = new ArrayList<>();
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
+        File file = new File(filePath);
+
+        // Check if file exists before attempting to read to avoid "file not found" errors on initial run
+        if (!file.exists()) {
+            return sales;
+        }
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             sales = (List<Sale>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error loading sales from file (or file not found): " + e.getMessage());
+            System.err.println("Error loading sales from file: " + e.getMessage());
         }
         return sales;
     }

@@ -30,11 +30,17 @@ public class BulkPurchaseDiscount extends Promotion {
 
     @Override
     public double calculateDiscount(Sale sale) {
-        if (sale == null || sale.getItems() == null) return 0.0;
-        int totalQuantity = sale.getItems().stream().mapToInt(item -> item.getQuantity()).sum();
-        if (totalQuantity >= minQuantity) {
-            return sale.getTotal() * (percentage / 100.0);
+        if (sale == null || sale.getProducts() == null) {
+            return 0.0;
         }
+
+        // Se cuenta la cantidad de productos en la lista de la venta
+        int totalQuantity = sale.getProducts().size();
+
+        if (totalQuantity >= minQuantity) {
+            return sale.getTotalAmount() * (percentage / 100.0);
+        }
+
         return 0.0;
     }
 }

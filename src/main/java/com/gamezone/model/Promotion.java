@@ -3,7 +3,7 @@ package com.gamezone.model;
 import java.time.LocalDate;
 
 /**
- * Abstract base class  representing a promotion in the system.
+ * Abstract base class representing a promotion in the system.
  */
 public abstract class Promotion {
     private String id;
@@ -16,8 +16,8 @@ public abstract class Promotion {
      *
      * @param id        The promotion identifier.
      * @param name      The promotion name.
-     * @param startDate The start date of the promotion.
-     * @param endDate   The end date of the promotion.
+     * @param startDate The start date.
+     * @param endDate   The end date.
      */
     public Promotion(String id, String name, LocalDate startDate, LocalDate endDate) {
         this.id = id;
@@ -30,52 +30,35 @@ public abstract class Promotion {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
     public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
     /**
-     * Checks if the promotion is active on a give date.
+     * Checks if the promotion is active on a given date.
      *
-     * @param date the date to check.
-     * @return true if the date is within the validity range (inclusive), false otherwise.
+     * @param date The date to check.
+     * @return true if the date is between start and end date (inclusive), false otherwise.
      */
-    public boolean idActive(LocalDate date) {
-        if(date == null || startDate == null || endDate == null){
-            return false;
-        }
-        return !date.isBefore(startDate) && !date.isAfter(endDate);
+    public boolean isActive(LocalDate date) {
+        if (date == null) return false;
+        return (date.isEqual(startDate) || date.isAfter(startDate)) &&
+                (date.isEqual(endDate) || date.isBefore(endDate));
     }
 
     /**
-     * Calculate the discount amount for specific sale.
+     * Calculates the discount amount for a given sale.
      *
-     * @param sale The sale to evaluate.
-     * @return the discount amount in currency units;
+     * @param sale The sale to calculate the discount for.
+     * @return The discount amount.
      */
     public abstract double calculateDiscount(Sale sale);
 }

@@ -5,9 +5,11 @@ import java.util.List;
 
 /**
  * Represents a sale transaction within the GameZone store.
+ * Stores transaction details, customer and seller references, purchased items,
+ * and tracks applied promotions and discount amounts.
  *
  * @author Miguel Vasquez
- * @version 1.0
+ * @version 1.1
  */
 
 public class Sale implements Serializable{
@@ -19,20 +21,25 @@ public class Sale implements Serializable{
     private String seller;
     private List<Product> products;
     private double totalAmount;
+    private String appliedPromotionName;
+    private double discountAmount;
 
     /**
-     * Constructs a new Sale with the specified details.
+     * Constructs a new Sale instance with initial purchase details.
      *
-     * @param saleId unique identifier for the sale
-     * @param date date of the transaction
-     * @param client client who made the purchase
-     * @param seller vendor who attended the sale
-     * @param products list of products purchased
+     * @param saleId Unique identifier for the sale.
+     * @param date Date when the sale occurred.
+     * @param client Customer identifier.
+     * @param seller Staff/seller identifier.
+     * @param products List of purchased products.
+     * @param totalAmount Subtotal amount before promotions.
      */
 
-    public Sale(String client, String date, List<Product> products, String saleId, String seller, double totalAmount) {
+    public Sale(String client, String date, double discountAmount, List<Product> products, String saleId, String seller, double totalAmount) {
+        this.appliedPromotionName = "Ninguna";
         this.client = client;
         this.date = date;
+        this.discountAmount = 0.0;
         this.products = products;
         this.saleId = saleId;
         this.seller = seller;
@@ -55,47 +62,121 @@ public class Sale implements Serializable{
         return total;
     }
 
-    public String getClient() {
-        return client;
-    }
-
-    public void setClient(String client) {
-        this.client = client;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public List<Product> getProducts() {
-        return products;
-    }
-
-    public void setProducts(List<Product> products) {
-        this.products = products;
-    }
-
+    /** @return Sale identifier. */
     public String getSaleId() {
         return saleId;
     }
 
+    /** @param saleId Sale identifier to set. */
     public void setSaleId(String saleId) {
         this.saleId = saleId;
     }
 
+    /** @return Sale date string. */
+    public String getDate() {
+        return date;
+    }
+
+    /** @param date Sale date string to set. */
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    /** @return Client identifier. */
+    public String getClient() {
+        return client;
+    }
+
+    /** @param client Client identifier to set. */
+    public void setClient(String client) {
+        this.client = client;
+    }
+
+    /** @return Seller identifier. */
     public String getSeller() {
         return seller;
     }
 
+    /** @param seller Seller identifier to set. */
     public void setSeller(String seller) {
         this.seller = seller;
     }
 
+    /** @return Purchased products list. */
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    /** @param products Purchased products list to set. */
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
+
+    /** @return Final total amount. */
     public double getTotalAmount() {
         return totalAmount;
+    }
+
+    /** @param totalAmount Final total amount to set. */
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    /** @return Applied promotion name. */
+    public String getAppliedPromotionName() {
+        return appliedPromotionName;
+    }
+
+    /** @param appliedPromotionName Applied promotion name to set. */
+    public void setAppliedPromotionName(String appliedPromotionName) {
+        this.appliedPromotionName = appliedPromotionName;
+    }
+
+    /** @return Applied discount amount. */
+    public double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    /** @param discountAmount Applied discount amount to set. */
+    public void setDiscountAmount(double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    /**
+     * Generates a formatted text receipt containing sale details, item list,
+     * subtotal, applied promotion discount, and total final price.
+     *
+     * @return Formatted receipt string.
+     */
+    public String generateReceipt(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("=========================================\n");
+        sb.append("              RECIBO DE VENTA           \n");
+        sb.append("=========================================\n");
+        sb.append("ID Venta   : ").append(saleId).append("\n");
+        sb.append("Fecha      : ").append(date).append("\n");
+        sb.append("Cliente    : ").append(client).append("\n");
+        sb.append("Vendedor   : ").append(seller).append("\n");
+        sb.append("-----------------------------------------\n");
+        sb.append("PRODUCTOS:\n");
+
+        double subtotal = 0.0;
+        if(products != null){
+            for(Product p: products){
+                sb.append(" - ").append(p.getTitle())
+                        .append(" | $").append(String.format("%.2f", p.getPrice())).append("\n");
+                subtotal += p.getPrice();
+            }
+        }
+
+        sb.append("-----------------------------------------\n");
+        sb.append(String.format("Subtotal    : $%.2f\n", subtotal));
+        sb.append("Promoción   : ").append(appliedPromotionName != null ? appliedPromotionName : "Ninguna").append("\n");
+        sb.append(String.format("Descuento   : -$%.2f\n", discountAmount));
+        sb.append("-----------------------------------------\n");
+        sb.append(String.format("TOTAL FINAL : $%.2f\n", totalAmount));
+        sb.append("=========================================\n");
+
+        return sb.toString();
     }
 }

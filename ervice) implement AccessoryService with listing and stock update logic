@@ -1,0 +1,75 @@
+[33m265057d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/accessory-module[m[33m, [m[1;31morigin/feature/accessory-module[m[33m)[m refactor(service): update javadocs to english and remove duplicate comments in PersonService
+[33m59fb2cc[m[33m ([m[1;32mfeature/accesory-module[m[33m)[m fix(service): remove merge conflict markers in PersonService
+[33m117f37f[m fix(merge): resolve merge conflict in PersonService
+[33m2c39087[m[33m ([m[1;31morigin/feature/accesory-module[m[33m)[m feat(model): add Memory class extending Accessory
+[33md857e97[m feat(model): add Cable class extending Accessory
+[33m0240528[m feat(model): add Controller class extending Accessory
+[33mad70861[m feat(model): add abstract Accessory class extending Product
+[33m8f1688a[m feat(data): add initial pre-loaded accessories csv file
+[33mc93f38b[m docs(diagram): add mermaid class diagram for accesory module
+[33m099c254[m docs(analysis): add guided analysis answers in english for acessory module
+[33mb2bb4cf[m[33m ([m[1;31morigin/develop[m[33m, [m[1;32mdevelop[m[33m)[m fix(persistence): handle non-existing file gracefully in SaleRepository
+[33m2247d10[m fix(ui): link inventory and persons consult options to service layer in ConsoleMenu
+[33m26e3a07[m Merge branch 'develop' of https://github.com/MiguelVasquezA/GamerZoneUnicesar into develop
+[33mcb91dc6[m Merge pull request #12 from MiguelVasquezA/feature/person-module
+[33mf05525d[m fix(sales): correct method visibility and getters in sale model and saleservice
+[33m97cb665[m[33m ([m[1;31morigin/feature/person-module[m[33m)[m docs: add Javadocs for PersonService class and methods
+[33me67adc5[m docs: add and standardize Javadocs in English for PersonFileHandler class
+[33mfc59099[m docs: add comprehensive Javadocs and complete methods for Seller class
+[33m459ac95[m docs: add comprehensive Javadocs and complete methods for Customer class
+[33med1c59a[m docs: complete and clean up Javadocs in Person class
+[33me215ccc[m feat(core): integrate services and repositories into main entry point
+[33m1c40928[m docs: add missing Javadocs for Person class getters and setters
+[33mc89fed5[m feat(javadocs): implemet java docs in the class person
+[33m31a85ae[m feat(javadocs): implement java docs in the class console menu
+[33m29f71de[m feat(ui): implement console interactives menu for GamerZone system
+[33m2b67437[m Merge pull request #11 from MiguelVasquezA/feature/person-module
+[33m69fd5fc[m create IA log for develop 1
+[33md032406[m feat: implement PersonService with add and search operations
+[33m56cdbfb[m feat: implement PersonService with add and search operations
+[33mbf854a7[m feat: implement PersonService with add and search operations
+[33m6525a87[m feat: implement PersonService with add and search operations
+[33mc60220e[m fix: resolve rename/delete conflict for IA-Usage log file
+[33m08e42ee[m chore: remove ia-usage folder from docs
+[33mee8719b[m[33m ([m[1;32mfeature/person-module[m[33m)[m docs: add developer 1 and developer 2 ia log
+[33me881d54[m fix(persistence): handle IOException and resource cleanup in SaleRepository
+[33m55c9513[m Merge pull request #10 from MiguelVasquezA/feature/person-module
+[33m0fd66bb[m feat: implement PersonFileHandler with Java serialization
+[33m2f0a0c1[m feat: implement Seller class with employee data
+[33mbe9dbcb[m feat: implement Customer class with purchase history
+[33m0f0e9ee[m Merge pull request #9 from MiguelVasquezA/feature/product-module
+[33m23d067d[m[33m ([m[1;31morigin/feature/product-module[m[33m)[m docs: add JavaDoc to ProductService public methods
+[33macac44a[m Merge pull request #8 from MiguelVasquezA/feature/sales-module
+[33m196e7b0[m Merge pull request #7 from MiguelVasquezA/feature/product-module
+[33m251bcd5[m fix: correct swapped model and generation parameters in Console reconstruction
+[33mdd659a9[m[33m ([m[1;31morigin/feature/sales-module[m[33m, [m[1;32mfeature/sales-module[m[33m)[m docs(ai-log): update leader-ai-log with 10 structured prompt entries
+[33m1f261f4[m feat: add Person abstract class with common attributes
+[33mf4b8ff6[m docs: fix markdown formatting in AI log
+[33mb593a4a[m docs: add developer1 AI usage log
+[33m0ebbe3f[m refactor(ai-usage): fix filename format
+[33m03b7989[m docs(analysis): update guided analysis answers in english for workshop 2
+[33m0028cfd[m Merge pull request #6 from MiguelVasquezA/feature/sales-module
+[33m1d19e25[m fix(docs): format leader-ai-log filename to lowercase and remove duplicate
+[33m316c3c2[m refactor(docs): move ai-usage logs directory into docs folder
+[33mf0c3e52[m Merge pull request #5 from MiguelVasquezA/feature/persistence
+[33m841dc92[m fix(core): update author metadata in java classes
+[33mfbcdc80[m Merge pull request #4 from MiguelVasquezA/feature/product-module
+[33m2bbd6eb[m Merge pull request #3 from MiguelVasquezA/feature/service
+[33mea03605[m fix: replace empty class templates with full implementation
+[33mb9de5fd[m docs: add leader IA usage log
+[33ma1ec338[m feat: implement ProductService with stock validation rules
+[33m3f09adb[m feat: implement ProductRepository for file-based persistence
+[33m2bf19da[m feat(service): implement SaleService logic and stock validation
+[33m12315ae[m fix(persistence): handle IOException and resource cleanup in SaleRepository
+[33m190b45f[m docs: add leader IA usage log
+[33me785597[m "feat(model): add Sale class with Serializable support"
+[33m1af3b2c[m Merge pull request #2 from MiguelVasquezA/feature/model
+[33m3185b01[m Fix: Javadoc Documentation and Parameters
+[33m449c6cc[m Merge pull request #1 from MiguelVasquezA/feature/model
+[33m30e2a74[m feat(model): implement VideoGame and Console classes
+[33m8b3de61[m feat(model): implement abstract Product base class
+[33mcb6d4bb[m docs: add technical analysis document
+[33m68d22c0[m docs: add layers diagram for architectural dependencies
+[33m13c47b7[m docs: add diagram class for system architecture
+[33m8203ede[m docs: add hierarchy diagram for model layer
+[33m0266aaa[m chore: configure initial project structure and four layers

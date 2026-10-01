@@ -36,7 +36,7 @@ public class Sale implements Serializable{
      */
 
     public Sale(String client, String date, double discountAmount, List<Product> products, String saleId, String seller, double totalAmount) {
-        this.appliedPromotionName = "Ninguna";
+        this.appliedPromotionName = "None";
         this.client = client;
         this.date = date;
         this.discountAmount = 0.0;
@@ -146,23 +146,23 @@ public class Sale implements Serializable{
      * Generates a formatted text receipt containing sale details, item list,
      * subtotal, applied promotion discount, and total final price.
      *
-     * @return Formatted receipt string.
+     * @return Formatted receipt string in English.
      */
-    public String generateReceipt(){
+    public String generateReceipt() {
         StringBuilder sb = new StringBuilder();
         sb.append("=========================================\n");
-        sb.append("              RECIBO DE VENTA           \n");
+        sb.append("              SALE RECEIPT               \n");
         sb.append("=========================================\n");
-        sb.append("ID Venta   : ").append(saleId).append("\n");
-        sb.append("Fecha      : ").append(date).append("\n");
-        sb.append("Cliente    : ").append(client).append("\n");
-        sb.append("Vendedor   : ").append(seller).append("\n");
+        sb.append("Sale ID    : ").append(saleId).append("\n");
+        sb.append("Date       : ").append(date).append("\n");
+        sb.append("Client     : ").append(client).append("\n");
+        sb.append("Seller     : ").append(seller).append("\n");
         sb.append("-----------------------------------------\n");
-        sb.append("PRODUCTOS:\n");
+        sb.append("PRODUCTS:\n");
 
         double subtotal = 0.0;
-        if(products != null){
-            for(Product p: products){
+        if (products != null) {
+            for (Product p : products) {
                 sb.append(" - ").append(p.getTitle())
                         .append(" | $").append(String.format("%.2f", p.getPrice())).append("\n");
                 subtotal += p.getPrice();
@@ -171,8 +171,8 @@ public class Sale implements Serializable{
 
         sb.append("-----------------------------------------\n");
         sb.append(String.format("Subtotal    : $%.2f\n", subtotal));
-        sb.append("Promoción   : ").append(appliedPromotionName != null ? appliedPromotionName : "Ninguna").append("\n");
-        sb.append(String.format("Descuento   : -$%.2f\n", discountAmount));
+        sb.append("Promotion   : ").append(appliedPromotionName != null ? appliedPromotionName : "None").append("\n");
+        sb.append(String.format("Discount    : -$%.2f\n", discountAmount));
         sb.append("-----------------------------------------\n");
         sb.append(String.format("TOTAL FINAL : $%.2f\n", totalAmount));
         sb.append("=========================================\n");

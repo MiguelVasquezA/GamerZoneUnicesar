@@ -23,7 +23,7 @@ public class PersonFileHandler {
     }
 
     /**
-     * saves the list of persons to the file using object serialization
+     * Saves the list of persons to the file using object serialization.
      *
      * @param persons the list of persons to save
      */
@@ -31,13 +31,13 @@ public class PersonFileHandler {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
             oos.writeObject(persons);
         } catch (IOException e) {
-            System.err.println("Error al guardar las personas en el archivo: " + e.getMessage());
+            System.err.println("Error saving persons to file: " + e.getMessage());
         }
     }
 
     /**
-     * loads the list of persons from the file.
-     * if the file does not exist or is empty, returns an empty list to prevent errors.
+     * Loads the list of persons from the file.
+     * If the file does not exist or is empty, returns an empty list to prevent errors.
      *
      * @return the list of loaded persons, or an empty list if not found or empty
      */
@@ -51,7 +51,7 @@ public class PersonFileHandler {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             return (List<Person>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error al cargar las personas desde el archivo: " + e.getMessage());
+            System.err.println("Error loading persons from file: " + e.getMessage());
             return new ArrayList<>();
         }
     }

@@ -1,11 +1,10 @@
 package com.gamezone.ui;
 
 import com.gamezone.model.*;
-import com.gamezone.service.AccessoryService;
-import com.gamezone.service.PersonService;
-import com.gamezone.service.ProductService;
-import com.gamezone.service.SaleService;
+import com.gamezone.service.*;
+import com.gamezone.model.Promotion;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.Scanner;
  * reading user inputs, and interacting exclusively with the service layer.
  *
  * @author Miguel Vasquez
- * @version 1.0
+ * @version 1.1
  */
 public class ConsoleMenu {
 
@@ -35,6 +34,9 @@ public class ConsoleMenu {
     /** Scanner instance for reading input from the standard console. */
     private final Scanner scanner;
 
+    /** Service layer instance for managing promotions. */
+    private final PromotionService promotionService;
+
     /**
      * Constructs a ConsoleMenu instance with the required services.
      *
@@ -42,13 +44,15 @@ public class ConsoleMenu {
      * @param accessoryService service handling accessory operations
      * @param personService    service handling person operations
      * @param saleService      service handling sale operations
+     * @param promotionService service handling promotion operations
      */
-    public ConsoleMenu(ProductService productService, AccessoryService accessoryService, PersonService personService, SaleService saleService) {
+    public ConsoleMenu(ProductService productService, AccessoryService accessoryService, PersonService personService, SaleService saleService, PromotionService promotionService) {
         this.productService = productService;
         this.accessoryService = accessoryService;
         this.personService = personService;
         this.saleService = saleService;
         this.scanner = new Scanner(System.in);
+        this.promotionService = promotionService;
     }
 
     /**
@@ -64,7 +68,8 @@ public class ConsoleMenu {
                 case 2 -> manageAccessoriesMenu();
                 case 3 -> managePersonsMenu();
                 case 4 -> registerSale();
-                case 5 -> consultInformationMenu();
+                case 5 -> managePromotionsMenu();
+                case 6 -> consultInformationMenu();
                 case 0 -> {
                     System.out.println("Exiting the application. Goodbye!");
                     exit = true;
@@ -83,7 +88,8 @@ public class ConsoleMenu {
         System.out.println("2. Accessory Management");
         System.out.println("3. Person Management");
         System.out.println("4. Register Sale");
-        System.out.println("5. Consult System Information");
+        System.out.println("5. Promotions Management");
+        System.out.println("6. Consult System Information");
         System.out.println("0. Exit");
         System.out.println("=======================================");
     }
@@ -155,7 +161,6 @@ public class ConsoleMenu {
                         .toList();
                 String connectionType = readString("Enter Connection Type (Wireless/Wired): ");
 
-                // Se envían los parámetros individuales
                 accessoryService.registerController(id, price, stock, title, compatibleConsoles, connectionType);
                 System.out.println("Controller registered successfully: " + title);
             }
@@ -259,6 +264,79 @@ public class ConsoleMenu {
     }
 
     /**
+     * Displays and handles the promotion management sub-menu.
+     * Allows registering new promotion types (percentage, category, bulk)
+     * and viewing all or active promotions.
+     */
+    private void managePromotionsMenu(){
+        System.out.println("\n--- Promotions Management ---");
+        System.out.println("1. Register General Percentage Promotions");
+        System.out.println("2. Register Category Discount Promotion");
+        System.out.println("3. Register Bulk Purchase Promotion");
+        System.out.println("4. List All Promotions");
+        System.out.println("5. List Active Promotions");
+        int option = readInt("Select an option: ");
+
+        switch (option) {
+            case 1 -> {
+                String id = readString("Enter Promotion ID: ");
+                String name = readString("Enter Promotion Name: ");
+                LocalDate startDate = LocalDate.parse(readString("Enter Start Date (YYYY-MM-DD): "));
+                LocalDate endDate = LocalDate.parse(readString("Enter End Date (YYYY-MM-DD): "));
+                double percentage = readDouble("Enter Discount Percentage: ");
+
+                promotionService.registerPercentageDiscount(id, name, startDate, endDate, percentage);
+                System.out.println("General Percentage Promotion registered successfully: " + name);
+            }
+            case 2 -> {
+                String id = readString("Enter Promotion ID: ");
+                String name = readString("Enter Promotion Name: ");
+                LocalDate startDate = LocalDate.parse(readString("Enter Start Date (YYYY-MM-DD): "));
+                LocalDate endDate = LocalDate.parse(readString("Enter End Date (YYYY-MM-DD): "));
+                double percentage = readDouble("Enter Discount Percentage: ");
+                String category = readString("Enter Target Category (VIDEOGAME/CONSOLE): ");
+
+                promotionService.registerCategoryDiscount(id, name, startDate, endDate, percentage, category);
+                System.out.println("Category Promotion registered successfully: " + name);
+            }
+            case 3 -> {
+                String id = readString("Enter Promotion ID: ");
+                String name = readString("Enter Promotion Name: ");
+                LocalDate startDate = LocalDate.parse(readString("Enter Start Date (YYYY-MM-DD): "));
+                LocalDate endDate = LocalDate.parse(readString("Enter End Date (YYYY-MM-DD): "));
+                double percentage = readDouble("Enter Discount Percentage: ");
+                int minQty = readInt("Enter Minimum Quantity of Items: ");
+
+                promotionService.registerBulkPurchaseDiscount(id, name, startDate, endDate, percentage, minQty);
+                System.out.println("Bulk Purchase Promotion registered successfully: " + name);
+            }
+            case 4 -> displayPromotions(promotionService.listAllPromotions());
+            case 5 -> displayPromotions(promotionService.listActivePromotions());
+            default -> System.out.println("Invalid option. Returning to main menu.");
+        }
+    }
+
+    /**
+     * Helper method to print a list of promotions in a clean formatted layout.
+     *
+     * @param promotions the list of promotions to display
+     */
+    private void displayPromotions(List<Promotion> promotions) {
+        System.out.println("\n--- PROMOTION LIST ---");
+        if (promotions == null || promotions.isEmpty()) {
+            System.out.println("No promotions available.");
+        } else {
+            for (Promotion promo : promotions) {
+                System.out.println("ID: " + promo.getId()
+                        + " | Name: " + promo.getName()
+                        + " | Start: " + promo.getStartDate()
+                        + " | End: " + promo.getEndDate()
+                        + " | Active: " + promo.isActive(LocalDate.now()));
+            }
+        }
+    }
+
+    /**
      * Displays and handles the sale registration flow.
      * Allows selecting both standard products and accessories in the same sale.
      */
@@ -303,7 +381,7 @@ public class ConsoleMenu {
             try {
                 Sale sale = saleService.registerSale(customerIdCard, sellerIdCard, itemsToBuy);
                 System.out.println("\nSale processed successfully!");
-                System.out.println("Sale ID: " + sale.getSaleId() + " | Total: $" + sale.getTotalAmount());
+                System.out.println(sale.generateReceipt());
             } catch (Exception e) {
                 System.out.println("Error processing sale: " + e.getMessage());
             }

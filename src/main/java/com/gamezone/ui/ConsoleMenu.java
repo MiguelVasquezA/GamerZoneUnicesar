@@ -37,22 +37,28 @@ public class ConsoleMenu {
     /** Service layer instance for managing promotions. */
     private final PromotionService promotionService;
 
+    /** Service layer instance for managing returns. */
+    private final ReturnService returnService;
+
     /**
-     * Constructs a ConsoleMenu instance with the required services.
+     * Constructs a ConsoleMenu instance with all required service dependencies,
+     * including product, accessory, person, sale, promotion, and return services.
      *
-     * @param productService   service handling product operations
-     * @param accessoryService service handling accessory operations
-     * @param personService    service handling person operations
-     * @param saleService      service handling sale operations
-     * @param promotionService service handling promotion operations
+     * @param productService   service layer instance handling product operations
+     * @param accessoryService service layer instance handling accessory operations
+     * @param personService    service layer instance handling person operations
+     * @param saleService      service layer instance handling sale operations
+     * @param promotionService service layer instance handling promotion operations
+     * @param returnService    service layer instance handling return operations
      */
-    public ConsoleMenu(ProductService productService, AccessoryService accessoryService, PersonService personService, SaleService saleService, PromotionService promotionService) {
+    public ConsoleMenu(ProductService productService, AccessoryService accessoryService, PersonService personService, SaleService saleService, Scanner scanner, PromotionService promotionService, ReturnService returnService) {
         this.productService = productService;
         this.accessoryService = accessoryService;
         this.personService = personService;
         this.saleService = saleService;
-        this.scanner = new Scanner(System.in);
+        this.scanner = scanner;
         this.promotionService = promotionService;
+        this.returnService = returnService;
     }
 
     /**
@@ -70,6 +76,7 @@ public class ConsoleMenu {
                 case 4 -> registerSale();
                 case 5 -> managePromotionsMenu();
                 case 6 -> consultInformationMenu();
+                case 7 -> manageReturnsMenu();
                 case 0 -> {
                     System.out.println("Exiting the application. Goodbye!");
                     exit = true;
@@ -90,6 +97,7 @@ public class ConsoleMenu {
         System.out.println("4. Register Sale");
         System.out.println("5. Promotions Management");
         System.out.println("6. Consult System Information");
+        System.out.println("7. Manage Returns"); // <--- NUEVA OPCIÓN
         System.out.println("0. Exit");
         System.out.println("=======================================");
     }
@@ -478,6 +486,54 @@ public class ConsoleMenu {
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a valid number.");
             }
+        }
+    }
+
+    /**
+     * Displays and handles the return management sub-menu (Requerimiento 3).
+     */
+    private void manageReturnsMenu() {
+        System.out.println("\n--- Return Management ---");
+        System.out.println("1. Process Product Return");
+        System.out.println("2. List All Returns");
+        int option = readInt("Select an option: ");
+
+        switch (option) {
+            case 1 -> {
+                String saleId = readString("Enter Original Sale ID: ");
+                String productId = readString("Enter Product ID to Return: ");
+                String reason = readString("Enter Reason (DEFECTIVE / CHANGE_OF_MIND): ");
+
+                List<String> productIds = List.of(productId);
+
+                try {
+                    Return returnObj = returnService.registerReturn(saleId, productIds, reason);
+                    if (returnObj != null) {
+                        System.out.println("\nReturn processed successfully!");
+                        System.out.println(returnObj.generateReturnReceipt());
+                    } else {
+                        System.out.println("Return failed. Check if sale is within 30 days or product exists.");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error processing return: " + e.getMessage());
+                }
+            }
+            case 2 -> {
+                System.out.println("\n--- RETURNED TRANSACTIONS ---");
+                List<Return> returns = returnService.viewAllReturns();
+                if (returns == null || returns.isEmpty()) {
+                    System.out.println("No returns recorded yet.");
+                } else {
+                    for (Return ret : returns) {
+                        String originalSaleId = (ret.getSale() != null) ? ret.getSale().getSaleId() : "N/A";
+                        System.out.println("ID: " + ret.getId()
+                                + " | Date: " + ret.getReturnDate()
+                                + " | Sale ID: " + originalSaleId
+                                + " | Refund: $" + ret.getRefundAmount());
+                    }
+                }
+            }
+            default -> System.out.println("Invalid option.");
         }
     }
 }

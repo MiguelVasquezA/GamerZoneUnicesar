@@ -179,4 +179,23 @@ public class Sale implements Serializable{
 
         return sb.toString();
     }
+    /**
+     * Checks if the sale is eligible for return within 30 calendar days.
+     *
+     * @return true if the current date is within 30 days of the sale date, false otherwise.
+     */
+    public boolean canBeReturned() {
+        if (this.date == null || this.date.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            // Extracts the YYYY-MM-DD portion if the string contains time or ISO format
+            String dateOnly = this.date.contains("T") ? this.date.split("T")[0] : this.date.trim();
+            java.time.LocalDate saleLocalDate = java.time.LocalDate.parse(dateOnly);
+            long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(saleLocalDate, java.time.LocalDate.now());
+            return daysBetween >= 0 && daysBetween <= 30;
+        } catch (java.time.format.DateTimeParseException e) {
+            return false;
+        }
+    }
 }

@@ -180,9 +180,11 @@ public class Sale implements Serializable{
         return sb.toString();
     }
     /**
-     * Checks if the sale is eligible for return within 30 calendar days.
+     * Checks if this sale is eligible for a return.
+     * A return can only be registered within 30 calendar days following the sale date.
+     * Parses the date string safely and verifies if it falls within the 30-day window.
      *
-     * @return true if the current date is within 30 days of the sale date, false otherwise.
+     * @return true if the sale date is within 30 days of today; false otherwise or if date is invalid
      */
     public boolean canBeReturned() {
         if (this.date == null || this.date.trim().isEmpty()) {

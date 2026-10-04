@@ -69,3 +69,78 @@ This document logs the architectural consultation, structural validations, and t
     * Recommended placing the application bootstrapper in `Main.java`, responsible for instantiating persistence repositories, wiring services, and starting the UI loop.
     * Suggested handling file initialization checks gracefully at startup to prevent application crashes on missing data files.
 * **Applied Outcome:** Structured `Main.java` initialization sequence and prepared the final system integration strategy.
+
+---
+
+### Entry 7: Inventory Restoration Strategy & Method Encapsulation
+* **Date:** 2026-09-12
+* **Topic:** Stock Replenishment Logic in ProductService
+* **Prompt Summary:** Requested architectural guidance on how to safely restore inventory stock during a return transaction without duplicating update code across services.
+* **AI Assistance / Guidance Received:**
+  * Advised encapsulating stock updates within `ProductService` via explicit methods (`restoreStock` or `updateStock`), preventing external classes from modifying product collections directly.
+  * Recommended ensuring persistence operations (`save` / `saveAll`) are triggered immediately after stock adjustment to maintain file storage synchronization.
+* **Applied Outcome:** Implemented defensive inventory restoration in `ProductService.java` to support return operations seamlessly.
+
+---
+
+### Entry 8: Domain Relationship Analysis for Return Module
+* **Date:** 2026-09-18
+* **Topic:** OOP Entity Associations & Composition Rules
+* **Prompt Summary:** Consulted on the proper domain modeling relationship between `Return`, `Sale`, and `Product` entities.
+* **AI Assistance / Guidance Received:**
+  * Clarified that `Return` holds an Association with `Sale` since sales exist independently of returns, rejecting inheritance or strong composition.
+  * Recommended representing returned items as a dedicated `List<Product>` attribute to support partial returns without mutating original sale records.
+* **Applied Outcome:** Validated domain entity structure and authored technical responses in `docs/return-analysis.md`.
+
+---
+
+### Entry 9: Terminal Merge Locks & Local Branch Recovery
+* **Date:** 2026-09-24
+* **Topic:** Git Workflow Troubleshooting & Branch Synchronization
+* **Prompt Summary:** Requested step-by-step guidance to exit stuck Vim text editors during terminal git merges and recover branch history safely.
+* **AI Assistance / Guidance Received:**
+  * Provided standard Vim navigation commands (`:wq` / `:q!`) to clear merge prompt locks in IntelliJ terminal.
+  * Advised using `git checkout develop -- <file>` to selectively sync conflicted shared files without losing local feature branch progress.
+* **Applied Outcome:** Restored terminal responsiveness and cleanly synchronized local `feature/return-module` with remote repository updates.
+
+---
+
+### Entry 10: Service Method Signature Alignment in Console UI
+* **Date:** 2026-09-29
+* **Topic:** UI Refactoring & Multi-Developer Method Resolution
+* **Prompt Summary:** Consulted on resolving compilation errors in `ConsoleMenu.java` caused by mismatched method signatures from teammates' service implementations (e.g., `registerReturn` vs `processReturn`, `viewAllReturns` vs `listAllReturns`, and `getSaleId` vs `getId`).
+* **AI Assistance / Guidance Received:**
+  * Guided the adaptation of `ConsoleMenu.java` to match exact method signatures exposed by `ReturnService` (`registerReturn`, `viewAllReturns`) and `Sale` (`getSaleId`).
+  * Advised wrapping service calls in `try-catch` blocks to display clean error feedback without interrupting the main console execution loop.
+* **Applied Outcome:** Successfully integrated `manageReturnsMenu()` in `ConsoleMenu.java` with complete exception handling and zero compilation errors.
+
+---
+
+### Entry 11: Return Architecture Class Diagram (Mermaid)
+* **Date:** 2026-10-01
+* **Topic:** Technical Documentation & Visual Architecture
+* **Prompt Summary:** Requested a standard Mermaid class diagram representation reflecting the exact fields, methods, and relationships between `Return`, `Sale`, `ReturnService`, `ProductService`, and `ReturnRepository`.
+* **AI Assistance / Guidance Received:**
+  * Formatted a compliant Mermaid `classDiagram` snippet with accurate cardinalities (1-to-1 and 1-to-many) and typed parameter lists matching the codebase.
+* **Applied Outcome:** Created and committed `docs/return-class-diagram.md` for project architecture review.
+
+---
+
+### Entry 12: Stream API Financial Balance Validation
+* **Date:** 2026-10-02
+* **Topic:** Business Logic Review & Financial Calculation Integrity
+* **Prompt Summary:** Requested review of the stream-based monthly balance calculation in `ReturnService` to ensure accurate net income generation.
+* **AI Assistance / Guidance Received:**
+  * Reviewed Java Stream API operations using `LocalDate.getMonthValue()` and `LocalDate.getYear()`, confirming double precision accumulation when subtracting total refunds from total sales.
+* **Applied Outcome:** Verified mathematical accuracy of `generateMonthlyBalance` in `ReturnService.java`.
+
+---
+
+### Entry 13: Technical Leader Deliverables Audit & PR Finalization
+* **Date:** 2026-10-02
+* **Topic:** Conventional Commits Standard & Pull Request Integration
+* **Prompt Summary:** Consulted on conducting a final verification of Technical Leader deliverables against project rubrics before merging into `develop`.
+* **AI Assistance / Guidance Received:**
+  * Validated that all 5 required technical leader tasks (stock restoration, UI integration, Mermaid diagram, README updates, and AI logs) were committed using proper Conventional Commit tags (`feat`, `docs`, `refactor`).
+  * Provided Pull Request merge guidelines (using standard Merge Commit over Rebase to preserve branch topology).
+* **Applied Outcome:** Finalized atomic commit history and successfully submitted Pull Request from `feature/return-module` to `develop`.

@@ -179,4 +179,25 @@ public class Sale implements Serializable{
 
         return sb.toString();
     }
+    /**
+     * Checks if this sale is eligible for a return.
+     * A return can only be registered within 30 calendar days following the sale date.
+     * Parses the date string safely and verifies if it falls within the 30-day window.
+     *
+     * @return true if the sale date is within 30 days of today; false otherwise or if date is invalid
+     */
+    public boolean canBeReturned() {
+        if (this.date == null || this.date.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            // Extracts the YYYY-MM-DD portion if the string contains time or ISO format
+            String dateOnly = this.date.contains("T") ? this.date.split("T")[0] : this.date.trim();
+            java.time.LocalDate saleLocalDate = java.time.LocalDate.parse(dateOnly);
+            long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(saleLocalDate, java.time.LocalDate.now());
+            return daysBetween >= 0 && daysBetween <= 30;
+        } catch (java.time.format.DateTimeParseException e) {
+            return false;
+        }
+    }
 }

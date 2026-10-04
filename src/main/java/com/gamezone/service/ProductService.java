@@ -97,4 +97,25 @@ public class ProductService {
             repository.save(products);
         });
     }
+
+    /**
+     * Restores stock quantity for a given product when a return is processed.
+     *
+     * @param productId ID of the product to replenish
+     * @param quantity  quantity to add back to stock
+     * @return true if product was found and stock updated; false otherwise
+     */
+    public boolean restoreStock(String productId, int quantity) {
+        if (productId == null || quantity <= 0) {
+            return false;
+        }
+        java.util.Optional<Product> optionalProduct = findById(productId);
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            product.setStock(product.getStock() + quantity);
+            repository.save(products);
+            return true;
+        }
+        return false;
+    }
 }

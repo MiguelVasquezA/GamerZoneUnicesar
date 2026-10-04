@@ -4,19 +4,25 @@ import com.gamezone.persistence.AccessoryRepository;
 import com.gamezone.persistence.PersonFileHandler;
 import com.gamezone.persistence.ProductRepository;
 import com.gamezone.persistence.PromotionRepository;
+import com.gamezone.persistence.ReturnRepository;
 import com.gamezone.persistence.SaleRepository;
+import com.gamezone.persistence.WarrantyRepository;
 import com.gamezone.service.AccessoryService;
 import com.gamezone.service.PersonService;
 import com.gamezone.service.ProductService;
 import com.gamezone.service.PromotionService;
+import com.gamezone.service.ReturnService;
 import com.gamezone.service.SaleService;
+import com.gamezone.service.WarrantyService;
+
+import java.util.Scanner;
 
 /**
  * Main execution class for the GamerZone application.
  * Responsible for initializing system repositories, services, and the UI layer.
  *
  * @author Miguel Vasquez
- * @version 1.1
+ * @version 1.2
  */
 public class Main {
 
@@ -26,6 +32,7 @@ public class Main {
      * @param args command-line arguments (unused)
      */
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
 
         // 1. Repositories
         ProductRepository productRepository = new ProductRepository("product.txt");
@@ -33,18 +40,39 @@ public class Main {
         PersonFileHandler personFileHandler = new PersonFileHandler("persons.txt");
         SaleRepository saleRepository = new SaleRepository("sales.txt");
         PromotionRepository promotionRepository = new PromotionRepository();
+        WarrantyRepository warrantyRepository = new WarrantyRepository();
 
-        // 2. Services
+        // 2. Base Services
         ProductService productService = new ProductService(productRepository);
         AccessoryService accessoryService = new AccessoryService(accessoryRepository);
         PersonService personService = new PersonService(personFileHandler);
         PromotionService promotionService = new PromotionService(promotionRepository);
 
-        // SaleService includes PromotionService dependency
-        SaleService saleService = new SaleService(productService, accessoryService, saleRepository, promotionService);
+        // WarrantyService initialization
+        WarrantyService warrantyService = new WarrantyService(warrantyRepository, productService, null);
 
-        // ConsoleMenu includes PromotionService dependency
-        ConsoleMenu consoleMenu = new ConsoleMenu(productService, accessoryService, personService, saleService, promotionService);
+        // SaleService includes WarrantyService dependency
+        SaleService saleService = new SaleService(productService, accessoryService, saleRepository, promotionService, warrantyService);
+
+        // Reload warranty data with active sale service reference
+        warrantyService.loadData();
+
+        // ReturnRepository and ReturnService initialization (using saleService and productService)
+        ReturnRepository returnRepository = new ReturnRepository(saleService, productService);
+        ReturnService returnService = new ReturnService(returnRepository, saleService, productService);
+
+        // ConsoleMenu includes all required services and scanner
+        ConsoleMenu consoleMenu = new ConsoleMenu(
+                productService,
+                accessoryService,
+                personService,
+                saleService,
+                scanner,
+                promotionService,
+                returnService,
+                warrantyService
+        );
+
         consoleMenu.start();
     }
 }

@@ -309,7 +309,7 @@ public class ConsoleMenu {
                 LocalDate startDate = LocalDate.parse(readString("Enter Start Date (YYYY-MM-DD): "));
                 LocalDate endDate = LocalDate.parse(readString("Enter End Date (YYYY-MM-DD): "));
                 double percentage = readDouble("Enter Discount Percentage: ");
-                String category = readString("Enter Target Category (VIDEOGAME/CONSOLE): ");
+                String category = readString("Enter Target Category (VIDEOGAME/CONSOLE/ACCESSORY): ");
 
                 promotionService.registerCategoryDiscount(id, name, startDate, endDate, percentage, category);
                 System.out.println("Category Promotion registered successfully: " + name);

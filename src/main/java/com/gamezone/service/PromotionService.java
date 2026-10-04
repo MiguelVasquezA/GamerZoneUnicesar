@@ -50,11 +50,17 @@ public class PromotionService {
      * @param start       The start date.
      * @param end         The end date.
      * @param percentage  The percentage discount value.
-     * @param category    The target category.
+     * @param category    The target category ("VIDEOGAME", "CONSOLE", or "ACCESSORY").
      */
     public void registerCategoryDiscount(String id, String name, LocalDate start, LocalDate end, double percentage, String category) {
+        if (!"VIDEOGAME".equalsIgnoreCase(category) &&
+                !"CONSOLE".equalsIgnoreCase(category) &&
+                !"ACCESSORY".equalsIgnoreCase(category)) {
+            throw new IllegalArgumentException("Invalid category. Allowed values: VIDEOGAME, CONSOLE, ACCESSORY.");
+        }
+
         List<Promotion> promotions = repository.loadAll();
-        promotions.add(new CategoryDiscount(id, name, start, end, percentage, category));
+        promotions.add(new CategoryDiscount(id, name, start, end, percentage, category.toUpperCase()));
         repository.saveAll(promotions);
     }
 

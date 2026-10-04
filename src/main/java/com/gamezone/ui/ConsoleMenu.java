@@ -15,7 +15,7 @@ import java.util.Scanner;
  * reading user inputs, and interacting exclusively with the service layer.
  *
  * @author Miguel Vasquez
- * @version 1.1
+ * @version 1.2
  */
 public class ConsoleMenu {
 
@@ -40,18 +40,26 @@ public class ConsoleMenu {
     /** Service layer instance for managing returns. */
     private final ReturnService returnService;
 
+    /** Service layer instance for managing warranties. */
+    private final WarrantyService warrantyService;
+
     /**
      * Constructs a ConsoleMenu instance with all required service dependencies,
-     * including product, accessory, person, sale, promotion, and return services.
+     * including product, accessory, person, sale, promotion, return, and warranty services.
      *
      * @param productService   service layer instance handling product operations
      * @param accessoryService service layer instance handling accessory operations
      * @param personService    service layer instance handling person operations
      * @param saleService      service layer instance handling sale operations
+     * @param scanner          scanner instance for console input
      * @param promotionService service layer instance handling promotion operations
      * @param returnService    service layer instance handling return operations
+     * @param warrantyService  service layer instance handling warranty operations
      */
-    public ConsoleMenu(ProductService productService, AccessoryService accessoryService, PersonService personService, SaleService saleService, Scanner scanner, PromotionService promotionService, ReturnService returnService) {
+    public ConsoleMenu(ProductService productService, AccessoryService accessoryService,
+                       PersonService personService, SaleService saleService,
+                       Scanner scanner, PromotionService promotionService,
+                       ReturnService returnService, WarrantyService warrantyService) {
         this.productService = productService;
         this.accessoryService = accessoryService;
         this.personService = personService;
@@ -59,6 +67,7 @@ public class ConsoleMenu {
         this.scanner = scanner;
         this.promotionService = promotionService;
         this.returnService = returnService;
+        this.warrantyService = warrantyService;
     }
 
     /**
@@ -77,6 +86,7 @@ public class ConsoleMenu {
                 case 5 -> managePromotionsMenu();
                 case 6 -> consultInformationMenu();
                 case 7 -> manageReturnsMenu();
+                case 8 -> manageWarrantiesMenu();
                 case 0 -> {
                     System.out.println("Exiting the application. Goodbye!");
                     exit = true;
@@ -97,7 +107,8 @@ public class ConsoleMenu {
         System.out.println("4. Register Sale");
         System.out.println("5. Promotions Management");
         System.out.println("6. Consult System Information");
-        System.out.println("7. Manage Returns"); // <--- NUEVA OPCIÓN
+        System.out.println("7. Manage Returns");
+        System.out.println("8. Manage Warranties");
         System.out.println("0. Exit");
         System.out.println("=======================================");
     }
@@ -145,7 +156,7 @@ public class ConsoleMenu {
     }
 
     /**
-     * Displays and handles the accessory management sub-menu (Requerimiento 1).
+     * Displays and handles the accessory management sub-menu.
      */
     private void manageAccessoriesMenu() {
         System.out.println("\n--- Accessory Management ---");
@@ -183,7 +194,6 @@ public class ConsoleMenu {
                 String connectorType = readString("Enter Connector Type (HDMI, USB, etc.): ");
                 double length = readDouble("Enter Cable Length (meters): ");
 
-                // Se envían los parámetros individuales
                 accessoryService.registerCable(id, price, stock, title, compatibleConsoles, connectorType, length);
                 System.out.println("Cable registered successfully: " + title);
             }
@@ -199,7 +209,6 @@ public class ConsoleMenu {
                 int capacity = readInt("Enter Storage Capacity (GB): ");
                 String memoryType = readString("Enter Memory Type (SD, microSD, Internal): ");
 
-                // Se envían los parámetros individuales
                 accessoryService.registerMemory(id, price, stock, title, compatibleConsoles, capacity, memoryType);
                 System.out.println("Memory registered successfully: " + title);
             }
@@ -273,8 +282,6 @@ public class ConsoleMenu {
 
     /**
      * Displays and handles the promotion management sub-menu.
-     * Allows registering new promotion types (percentage, category, bulk)
-     * and viewing all or active promotions.
      */
     private void managePromotionsMenu(){
         System.out.println("\n--- Promotions Management ---");
@@ -346,7 +353,6 @@ public class ConsoleMenu {
 
     /**
      * Displays and handles the sale registration flow.
-     * Allows selecting both standard products and accessories in the same sale.
      */
     private void registerSale() {
         System.out.println("\n--- Register New Sale ---");
@@ -355,6 +361,7 @@ public class ConsoleMenu {
 
         List<Product> itemsToBuy = new ArrayList<>();
         boolean addingItems = true;
+        boolean hasConsole = false;
 
         while (addingItems) {
             System.out.println("\n1. Add Product (Game/Console)");
@@ -366,7 +373,10 @@ public class ConsoleMenu {
                 case 1 -> {
                     String productId = readString("Enter Product ID: ");
                     productService.findById(productId).ifPresentOrElse(
-                            itemsToBuy::add,
+                            product -> {
+                                itemsToBuy.add(product);
+                                System.out.println("Product added: " + product.getTitle());
+                            },
                             () -> System.out.println("Product not found.")
                     );
                 }
@@ -386,8 +396,21 @@ public class ConsoleMenu {
         }
 
         if (!itemsToBuy.isEmpty()) {
+            for (Product p : itemsToBuy) {
+                if (p instanceof Console) {
+                    hasConsole = true;
+                    break;
+                }
+            }
+
+            boolean wantsExtendedWarranty = false;
+            if (hasConsole) {
+                String choice = readString("Do you want to purchase an Extended Warranty for Console(s)? (Y/N): ");
+                wantsExtendedWarranty = choice.equalsIgnoreCase("Y");
+            }
+
             try {
-                Sale sale = saleService.registerSale(customerIdCard, sellerIdCard, itemsToBuy);
+                Sale sale = saleService.registerSale(customerIdCard, sellerIdCard, itemsToBuy, wantsExtendedWarranty);
                 System.out.println("\nSale processed successfully!");
                 System.out.println(sale.generateReceipt());
             } catch (Exception e) {
@@ -399,8 +422,53 @@ public class ConsoleMenu {
     }
 
     /**
+     * Displays and handles the warranty management sub-menu.
+     */
+    private void manageWarrantiesMenu() {
+        System.out.println("\n--- Warranty Management ---");
+        System.out.println("1. List All Warranties");
+        System.out.println("2. List Active Warranties");
+        System.out.println("3. List Warranties Expiring Soon (Next 30 Days)");
+        System.out.println("4. Find Warranty by Product and Sale ID");
+        int option = readInt("Select an option: ");
+
+        switch (option) {
+            case 1 -> displayWarranties(warrantyService.listAllWarranties());
+            case 2 -> displayWarranties(warrantyService.listActiveWarranties());
+            case 3 -> displayWarranties(warrantyService.listWarrantiesExpiringSoon(30));
+            case 4 -> {
+                String productId = readString("Enter Product ID: ");
+                String saleId = readString("Enter Sale ID: ");
+                Warranty w = warrantyService.findWarrantyByProduct(productId, saleId);
+                if (w != null) {
+                    System.out.println("\n" + w.generateWarrantyCertificate());
+                } else {
+                    System.out.println("No matching warranty found.");
+                }
+            }
+            default -> System.out.println("Invalid option.");
+        }
+    }
+
+    /**
+     * Helper method to print a list of warranties.
+     *
+     * @param warranties the list of warranties to print
+     */
+    private void displayWarranties(List<Warranty> warranties) {
+        System.out.println("\n--- WARRANTY LIST ---");
+        if (warranties == null || warranties.isEmpty()) {
+            System.out.println("No warranties found.");
+        } else {
+            for (Warranty warranty : warranties) {
+                System.out.println(warranty.generateWarrantyCertificate());
+                System.out.println("----------------------------------------");
+            }
+        }
+    }
+
+    /**
      * Displays and handles the information lookup sub-menu.
-     * Fetches real-time data from the service layer for inventory and registered persons.
      */
     private void consultInformationMenu() {
         System.out.println("\n--- Consult System Information ---");
@@ -490,7 +558,7 @@ public class ConsoleMenu {
     }
 
     /**
-     * Displays and handles the return management sub-menu (Requerimiento 3).
+     * Displays and handles the return management sub-menu.
      */
     private void manageReturnsMenu() {
         System.out.println("\n--- Return Management ---");

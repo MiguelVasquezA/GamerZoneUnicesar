@@ -6,7 +6,7 @@ import java.time.LocalDate;
  * Concrete class representing a percentage discount applicable exclusively to products of a target category.
  *
  * @author Miguel Vasquez
- * @version 1.0
+ * @version 1.1
  */
 public class CategoryDiscount extends Promotion {
     private double percentage;
@@ -20,7 +20,7 @@ public class CategoryDiscount extends Promotion {
      * @param startDate      start date
      * @param endDate        end date
      * @param percentage     discount percentage
-     * @param targetCategory target category ("VIDEOGAME", "CONSOLE")
+     * @param targetCategory target category ("VIDEOGAME", "CONSOLE", "ACCESSORY")
      */
     public CategoryDiscount(String id, String name, LocalDate startDate, LocalDate endDate, double percentage, String targetCategory) {
         super(id, name, startDate, endDate);
@@ -51,9 +51,11 @@ public class CategoryDiscount extends Promotion {
 
         double eligibleSubtotal = 0.0;
         for(Product product : sale.getProducts()){
-            if("VIDEOGAME".equalsIgnoreCase(targetCategory)&& product instanceof VideoGame){
+            if("VIDEOGAME".equalsIgnoreCase(targetCategory) && product instanceof VideoGame){
                 eligibleSubtotal += product.getPrice();
-            }else if("CONSOLE".equalsIgnoreCase(targetCategory)&& product instanceof Console){
+            } else if("CONSOLE".equalsIgnoreCase(targetCategory) && product instanceof Console){
+                eligibleSubtotal += product.getPrice();
+            } else if("ACCESSORY".equalsIgnoreCase(targetCategory) && product instanceof Accessory){
                 eligibleSubtotal += product.getPrice();
             }
         }

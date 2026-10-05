@@ -13,16 +13,17 @@ import java.util.stream.Collectors;
 
 /**
  * Service responsible for managing return business logic, including validations,
- * inventory restoration, and monthly balance generation.
+ * inventory restoration (both products and accessories), and monthly balance generation.
  *
  * @author Desarrolladora 2
- * @version 1.2
+ * @version 1.3
  */
 public class ReturnService {
 
     private final ReturnRepository returnRepository;
     private final SaleService saleService;
     private final ProductService productService;
+    private final AccessoryService accessoryService;
 
     /**
      * Constructs a new ReturnService with its required repository and service dependencies.
@@ -30,21 +31,23 @@ public class ReturnService {
      * @param returnRepository the repository to persist and load returns
      * @param saleService the service to handle and verify sales
      * @param productService the service to manage product inventory
+     * @param accessoryService the service to manage accessory inventory
      */
-    public ReturnService(ReturnRepository returnRepository, SaleService saleService, ProductService productService) {
+    public ReturnService(ReturnRepository returnRepository, SaleService saleService, ProductService productService, AccessoryService accessoryService) {
         this.returnRepository = returnRepository;
         this.saleService = saleService;
         this.productService = productService;
+        this.accessoryService = accessoryService;
     }
 
     /**
-     * Registers a new product return associated with a sale after validating business rules.
+     * Registers a new product or accessory return associated with a sale after validating business rules.
      *
      * @param saleId the ID of the original sale
-     * @param productIds the list of product IDs being returned
+     * @param productIds the list of product/accessory IDs being returned
      * @param reason the reason for the return
      * @return the newly created and persisted Return object
-     * @throws IllegalArgumentException if the sale does not exist, the return period has expired, or products do not belong to the sale
+     * @throws IllegalArgumentException if the sale does not exist, the return period has expired, or items do not belong to the sale
      */
     public Return registerReturn(String saleId, List<String> productIds, String reason) {
         // 1. Find the sale using listAllSales() provided by SaleService
@@ -62,7 +65,7 @@ public class ReturnService {
             throw new IllegalArgumentException("El plazo de 30 días para realizar devoluciones de esta venta ha expirado.");
         }
 
-        // 3. Validate product ownership
+        // 3. Validate product/accessory ownership
         List<Product> productsToReturn = new ArrayList<>();
         for (String productId : productIds) {
             Product product = sale.getProducts().stream()
@@ -71,17 +74,21 @@ public class ReturnService {
                     .orElse(null);
 
             if (product == null) {
-                throw new IllegalArgumentException("El producto con ID " + productId + " no pertenece a la venta original.");
+                throw new IllegalArgumentException("El ítem con ID " + productId + " no pertenece a la venta original.");
             }
             productsToReturn.add(product);
         }
 
-        // 4. Restore inventory stock (adding 1 back to current stock using productService.updateStock)
+        // 4. Restore inventory stock (delegating to AccessoryService if it's an accessory, otherwise to ProductService)
         for (Product product : productsToReturn) {
-            productService.updateStock(product.getId(), product.getStock() + 1);
+            if (accessoryService.findById(product.getId()) != null) {
+                accessoryService.restoreStock(product.getId(), 1);
+            } else {
+                productService.updateStock(product.getId(), product.getStock() + 1);
+            }
         }
 
-        // 5. Create the return instance using the exact 5 parameters of the Return model constructor
+        // 5. Create the return instance using the exact parameters of the Return model constructor
         String returnId = "RET-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
         Return newReturn = new Return(returnId, LocalDate.now(), sale, productsToReturn, reason);
 

@@ -15,7 +15,7 @@ import java.util.List;
  * Responsible for saving and loading sale records to and from disk.
  *
  * @author Miguel Vasquez
- * @version 1.0
+ * @version 1.1
  */
 public class SaleRepository {
 
@@ -64,5 +64,22 @@ public class SaleRepository {
             System.err.println("Error loading sales from file: " + e.getMessage());
         }
         return sales;
+    }
+
+    /**
+     * Finds a specific sale by its unique identifier.
+     *
+     * @param saleId the unique identifier of the sale
+     * @return the matching Sale object, or null if not found
+     */
+    public Sale findById(String saleId) {
+        if (saleId == null || saleId.trim().isEmpty()) {
+            return null;
+        }
+        List<Sale> sales = loadSales();
+        return sales.stream()
+                .filter(s -> s.getSaleId() != null && s.getSaleId().equals(saleId))
+                .findFirst()
+                .orElse(null);
     }
 }

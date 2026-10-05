@@ -49,3 +49,48 @@
 * **Prompt:** "What steps should I follow to verify that my `feature/person-module` branch is ready to open a Pull Request into `develop`?"
 * **Usage:** Performed a final review of changes, verified that commits adhered to atomic commit messages, and prepared the description for team code reviews.
 * **Reflection:** Validated the successful closure of the development cycle for the assigned module within the team.
+
+## [ 2026-09-25 ] — Initial Analysis of System Integration Requirements
+* **Prompt:** "What are the main integration issues assigned to Developer 2 in Requirement 5 of the project?"
+* **Usage:** Reviewed the integration document to map out the assigned tasks (A2 for warranty circular dependency, A4 for accessory stock restoration, and A6 for monthly balance reporting).
+* **Reflection:** Understood the scope of integration adjustments required to unify independent modules into a stable system architecture.
+
+## [ 2026-09-28 ] — Branch Setup for Warranty Circular Dependency Fix
+* **Prompt:** "How do I create and switch to a dedicated integration branch for fixing architectural flaws?"
+* **Usage:** Created and checked out the `fix/warranty-circular-dependency` branch starting from an updated `develop` branch.
+* **Reflection:** Reinforced the practice of isolating bug fixes and architectural refactors in dedicated branches before merging.
+
+## [ 2026-09-30 ] — Restructuring Warranty Persistence Strategy
+* **Prompt:** "How can I refactor `WarrantyRepository` to avoid depending directly on `SaleService`?"
+* **Usage:** Modified the repository methods to persist and read simple identifiers (`productId` and `saleId`) from the CSV storage instead of injecting high-level business services.
+* **Reflection:** Clarified the boundary between data layers and business logic layers, ensuring repositories remain decoupled from services.
+
+## [ 2026-10-01 ] — Resolving Circular Dependencies via Clean Constructor Injection
+* **Prompt:** "How should I update `WarrantyService` and `SaleRepository` to break the cycle between sales and warranties?"
+* **Usage:** Replaced the `SaleService` injection in `WarrantyService` with `SaleRepository`, and implemented a clean `findById` method inside `SaleRepository` for point-in-time relationship resolution.
+* **Reflection:** Understood how direct repository injection successfully breaks circular dependency chains without sacrificing data integrity.
+
+## [ 2026-10-02 ] — Troubleshooting Compilation Errors with Optional and Methods
+* **Prompt:** "How do I fix compilation errors related to `Optional<Product>` and missing repository lookup methods in Java?"
+* **Usage:** Applied `.orElse(null)` when fetching products via `ProductService` and implemented the missing `findById` search query inside `SaleRepository`.
+* **Reflection:** Improved debugging skills regarding Java Stream API return types and null safety handling.
+
+## [ 2026-10-03 ] — Cleaning Up Dependency Initialization in the Main Class
+* **Prompt:** "How do I update `Main.java` to initialize `WarrantyService` cleanly without workarounds or null pointers?"
+* **Usage:** Removed temporary workarounds and reordered the initialization sequence in the `Main` class to inject `SaleRepository` directly into `WarrantyService`.
+* **Reflection:** Recognized how clean dependency injection simplifies application bootstrapping and eliminates initialization hacks.
+
+## [ 2026-10-04 ] — Crafting Atomic Commits for the Warranty Integration Fix
+* **Prompt:** "What is the best way to structure atomic commits in English for the changes made across repositories, services, and the main class?"
+* **Usage:** Generated clear, prefix-based commit messages (`fix:`) for `SaleRepository`, `WarrantyRepository`, `WarrantyService`, and `Main`.
+* **Reflection:** Strengthened version control discipline by documenting incremental code improvements clearly.
+
+## [ 2026-10-05 ] — Preparing the Pull Request for the Warranty Fix
+* **Prompt:** "What details should I include in the Pull Request description to explain the circular dependency solution?"
+* **Usage:** Compiled a professional PR description detailing the problem, root cause, implemented solution, and verification steps for team review.
+* **Reflection:** Appreciated the importance of thorough documentation during code reviews to facilitate team collaboration.
+
+## [ 2026-10-05 ] — Planning the Next Integration Phase (Accessory Returns & Balance)
+* **Prompt:** "How should I approach the next adjustment for accessory stock restoration and monthly balance calculations?"
+* **Usage:** Outlined the technical steps required for implementing `restoreStock` in `AccessoryService` and updating financial calculations in `ReturnService`.
+* **Reflection:** Established a structured roadmap for tackling the remaining integration tasks efficiently.

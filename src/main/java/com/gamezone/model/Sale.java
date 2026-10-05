@@ -9,10 +9,9 @@ import java.util.List;
  * and tracks applied promotions and discount amounts.
  *
  * @author Miguel Vasquez
- * @version 1.1
+ * @version 1.2
  */
-
-public class Sale implements Serializable{
+public class Sale implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String saleId;
@@ -28,22 +27,29 @@ public class Sale implements Serializable{
      * Constructs a new Sale instance with initial purchase details.
      *
      * @param saleId Unique identifier for the sale.
-     * @param date Date when the sale occurred.
      * @param client Customer identifier.
-     * @param seller Staff/seller identifier.
      * @param products List of purchased products.
-     * @param totalAmount Subtotal amount before promotions.
+     * @param totalAmount Final total amount after discounts.
+     * @param discountAmount Applied discount amount.
+     * @param date Date when the sale occurred.
+     * @param seller Staff/seller identifier.
      */
-
-    public Sale(String client, String date, double discountAmount, List<Product> products, String saleId, String seller, double totalAmount) {
-        this.appliedPromotionName = "None";
-        this.client = client;
-        this.date = date;
-        this.discountAmount = 0.0;
-        this.products = products;
+    public Sale(String saleId, String client, List<Product> products, double totalAmount, double discountAmount, String date, String seller) {
         this.saleId = saleId;
-        this.seller = seller;
+        this.client = client;
+        this.products = products;
         this.totalAmount = totalAmount;
+        this.discountAmount = discountAmount;
+        this.date = date;
+        this.seller = seller != null ? seller : "N/A";
+        this.appliedPromotionName = "None";
+    }
+
+    /**
+     * Overloaded constructor for compatibility with simpler service calls.
+     */
+    public Sale(String saleId, String client, List<Product> products, double totalAmount, double discountAmount, String date) {
+        this(saleId, client, products, totalAmount, discountAmount, date, "N/A");
     }
 
     /**
@@ -51,11 +57,10 @@ public class Sale implements Serializable{
      *
      * @return the total price of the sale
      */
-
-    public double calculateTotal(){
+    public double calculateTotal() {
         double total = 0.0;
-        if (products != null){
-            for (Product p: products){
+        if (products != null) {
+            for (Product p : products) {
                 total += p.getPrice();
             }
         }
@@ -190,10 +195,10 @@ public class Sale implements Serializable{
 
         return sb.toString();
     }
+
     /**
      * Checks if this sale is eligible for a return.
      * A return can only be registered within 30 calendar days following the sale date.
-     * Parses the date string safely and verifies if it falls within the 30-day window.
      *
      * @return true if the sale date is within 30 days of today; false otherwise or if date is invalid
      */
@@ -202,7 +207,6 @@ public class Sale implements Serializable{
             return false;
         }
         try {
-            // Extracts the YYYY-MM-DD portion if the string contains time or ISO format
             String dateOnly = this.date.contains("T") ? this.date.split("T")[0] : this.date.trim();
             java.time.LocalDate saleLocalDate = java.time.LocalDate.parse(dateOnly);
             long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(saleLocalDate, java.time.LocalDate.now());

@@ -5,6 +5,7 @@ import com.gamezone.model.ExtendedWarranty;
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
 import com.gamezone.model.Warranty;
+import com.gamezone.persistence.SaleRepository;
 import com.gamezone.persistence.WarrantyRepository;
 
 import java.time.LocalDate;
@@ -16,38 +17,37 @@ import java.util.stream.Collectors;
 /**
  * Service class responsible for managing warranty business logic,
  * including creation, persistence coordination, and date-based filtering.
+ * Uses SaleRepository directly to prevent circular dependency cycles with SaleService.
  *
  * @author GameZone Team
- * @version 1.0
+ * @version 2.0
  */
 public class WarrantyService {
     private final WarrantyRepository warrantyRepository;
     private final ProductService productService;
-    private final SaleService saleService;
+    private final SaleRepository saleRepository;
     private List<Warranty> warranties;
 
     /**
-     * Constructs a new WarrantyService with its required dependencies and loads existing records.
+     * Constructs a new WarrantyService with its required clean dependencies and loads existing records.
      *
      * @param warrantyRepository repository for warranty data persistence
      * @param productService service to manage and retrieve products
-     * @param saleService service to manage and retrieve sales
+     * @param saleRepository repository to manage and retrieve sales directly
      */
-    public WarrantyService(WarrantyRepository warrantyRepository, ProductService productService, SaleService saleService) {
+    public WarrantyService(WarrantyRepository warrantyRepository, ProductService productService, SaleRepository saleRepository) {
         this.warrantyRepository = warrantyRepository;
         this.productService = productService;
-        this.saleService = saleService;
+        this.saleRepository = saleRepository;
         this.warranties = new ArrayList<>();
         loadData();
     }
 
     /**
-     * Loads all warranties from the repository using current product and sale datasets.
+     * Loads all warranties from the repository using current product and sale database references.
      */
     public void loadData() {
-        List<Product> products = productService != null ? productService.listProducts() : new ArrayList<>();
-        List<Sale> sales = saleService != null ? saleService.listAllSales() : new ArrayList<>(); // <-- CORREGIDO
-        this.warranties = warrantyRepository.loadAll(products, sales);
+        this.warranties = warrantyRepository.loadAll(productService, saleRepository);
         if (this.warranties == null) {
             this.warranties = new ArrayList<>();
         }
@@ -95,7 +95,7 @@ public class WarrantyService {
     /**
      * Finds a specific warranty associated with a given product ID and sale ID.
      *
-     * @.param productId the unique identifier of the product
+     * @param productId the unique identifier of the product
      * @param saleId the unique identifier of the sale
      * @return the matching Warranty, or null if not found
      */

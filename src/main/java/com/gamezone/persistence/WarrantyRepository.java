@@ -1,10 +1,11 @@
 package com.gamezone.persistence;
 
-import com.gamezone.model.Warranty;
 import com.gamezone.model.BasicWarranty;
 import com.gamezone.model.ExtendedWarranty;
+import com.gamezone.model.Warranty;
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
+import com.gamezone.service.ProductService;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -13,10 +14,11 @@ import java.util.List;
 
 /**
  * Repository class for managing warranty data persistence in CSV format.
- * Handles reading from and writing to data/warranties.csv using a discriminator field.
+ * Handles reading from and writing to data/warranties.csv using a discriminator field,
+ * resolving relationships via product service and sale repository to avoid circular dependencies.
  *
  * @author GameZone Team
- * @version 1.0
+ * @version 2.0
  */
 public class WarrantyRepository {
     private static final String FILE_PATH = "data/warranties.csv";
@@ -48,13 +50,13 @@ public class WarrantyRepository {
     /**
      * Loads all warranties from the CSV file.
      * Reconstructs BasicWarranty and ExtendedWarranty instances using a discriminator field,
-     * and maps their respective product and sale relationships using the provided lists.
+     * and maps their respective product and sale relationships using the provided service and repository.
      *
-     * @param products list of available products to resolve product references
-     * @param sales list of available sales to resolve sale references
+     * @param productService service to resolve product references by ID
+     * @param saleRepository repository to resolve sale references by ID
      * @return a list of loaded warranties, or an empty list if the file does not exist
      */
-    public List<Warranty> loadAll(List<Product> products, List<Sale> sales) {
+    public List<Warranty> loadAll(ProductService productService, SaleRepository saleRepository) {
         List<Warranty> warranties = new ArrayList<>();
         File file = new File(FILE_PATH);
         if (!file.exists()) return warranties;
@@ -72,16 +74,16 @@ public class WarrantyRepository {
                 String saleId = parts[3];
                 LocalDate startDate = parts.length > 4 && !parts[4].isEmpty() ? LocalDate.parse(parts[4]) : LocalDate.now();
 
-                // Find product by ID
+                // Find product by ID (Corregido con .orElse(null))
                 Product product = null;
-                if (products != null) {
-                    product = products.stream().filter(p -> p.getId().equals(productId)).findFirst().orElse(null);
+                if (productService != null) {
+                    product = productService.findById(productId).orElse(null);
                 }
 
-                // Find sale by ID
+                // Find sale by ID (Usando el nuevo método findById de SaleRepository)
                 Sale sale = null;
-                if (sales != null) {
-                    sale = sales.stream().filter(s -> s.getSaleId().equals(saleId)).findFirst().orElse(null);
+                if (saleRepository != null) {
+                    sale = saleRepository.findById(saleId);
                 }
 
                 if ("BASIC".equalsIgnoreCase(type)) {

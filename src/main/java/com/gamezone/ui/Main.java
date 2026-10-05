@@ -22,7 +22,7 @@ import java.util.Scanner;
  * Responsible for initializing system repositories, services, and the UI layer.
  *
  * @author Miguel Vasquez
- * @version 2.0
+ * @version 2.1
  */
 public class Main {
 
@@ -48,17 +48,17 @@ public class Main {
         PersonService personService = new PersonService(personFileHandler);
         PromotionService promotionService = new PromotionService(promotionRepository);
 
-        // 3. WarrantyService initialization (Ahora recibe saleRepository directamente, sin nulos)
+        // 3. WarrantyService initialization
         WarrantyService warrantyService = new WarrantyService(warrantyRepository, productService, saleRepository);
 
         // 4. SaleService includes WarrantyService dependency
         SaleService saleService = new SaleService(productService, accessoryService, saleRepository, promotionService, warrantyService);
 
-        // ReturnRepository and ReturnService initialization (using saleService and productService)
+        // 5. ReturnRepository and ReturnService initialization (Ahora pasamos accessoryService al ReturnService para el Ajuste A4)
         ReturnRepository returnRepository = new ReturnRepository(saleService, productService);
-        ReturnService returnService = new ReturnService(returnRepository, saleService, productService);
+        ReturnService returnService = new ReturnService(returnRepository, saleService, productService, accessoryService);
 
-        // ConsoleMenu includes all required services and scanner
+        // 6. ConsoleMenu includes all required services and scanner
         ConsoleMenu consoleMenu = new ConsoleMenu(
                 productService,
                 accessoryService,

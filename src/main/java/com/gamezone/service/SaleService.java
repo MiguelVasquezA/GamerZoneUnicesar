@@ -11,11 +11,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Service class responsible for managing sale transactions, applying best promotions,
- * updating inventory, and issuing automatic or extended warranties.
+ * Service class responsible for unified sale transactions processing,
+ * stock validations, promotion evaluation, and warranty issuance.
  *
  * @author Miguel Vasquez
- * @version 1.2
+ * @version 1.3
  */
 public class SaleService {
     private final ProductService productService;
@@ -25,13 +25,13 @@ public class SaleService {
     private final WarrantyService warrantyService;
 
     /**
-     * Constructs a new SaleService with all necessary dependencies, including warranty management.
+     * Constructs a SaleService with required dependencies.
      *
-     * @param productService service for managing general product inventory.
-     * @param accessoryService service for managing accessory inventory.
-     * @param saleRepository repository for persisting sale records.
-     * @param promotionService service for calculating and applying best available promotions.
-     * @param warrantyService service for processing and issuing product warranties.
+     * @param productService    service for product management
+     * @param accessoryService  service for accessory management
+     * @param saleRepository     repository for sale persistence
+     * @param promotionService   service for evaluating promotions
+     * @param warrantyService    service for managing warranties
      */
     public SaleService(ProductService productService, AccessoryService accessoryService,
                        SaleRepository saleRepository, PromotionService promotionService,
@@ -44,20 +44,18 @@ public class SaleService {
     }
 
     /**
-     * Registers a new sale transaction, calculates applicable promotions,
-     * updates inventory, and processes console warranties.
+     * Registers a new sale transaction following the unified flow sequence.
      *
-     * @param client the client who makes the purchase.
-     * @param seller the vendor who processes the sale.
-     * @param products the list of products or accessories being purchased.
-     * @param wantsExtendedWarranty true if extended warranty was requested for eligible products.
-     * @return the processed {@link Sale} object with discounts and warranty adjustments applied.
-     * @throws IllegalArgumentException if the items list is null or empty.
-     * @throws IllegalStateException if any item in the sale does not have enough stock.
+     * @param client                client ID or name
+     * @param seller                seller ID or name
+     * @param products              list of items to purchase
+     * @param wantsExtendedWarranty flag for optional extended warranty on consoles
+     * @return registered {@link Sale} instance
      */
     public Sale registerSale(String client, String seller, List<Product> products, boolean wantsExtendedWarranty) {
+
         if (products == null || products.isEmpty()) {
-            throw new IllegalArgumentException("Sale must contain at least one product.");
+            throw new IllegalArgumentException("Sale must contain at least one item.");
         }
 
         for (Product item : products) {
@@ -69,36 +67,40 @@ public class SaleService {
         String saleId = "SALE-" + System.currentTimeMillis();
         String date = LocalDate.now().toString();
 
-        double totalAmount = 0.0;
+        double subtotal = 0.0;
         for (Product item : products) {
-            totalAmount += item.getPrice();
+            subtotal += item.getPrice();
         }
 
-        Sale sale = new Sale(client, date, 0.0, products, saleId, seller, totalAmount);
+        Sale sale = new Sale(client, date, 0.0, products, saleId, seller, subtotal);
 
+        double discountAmount = 0.0;
         if (promotionService != null) {
             Promotion bestPromotion = promotionService.findBestPromotionFor(sale);
             if (bestPromotion != null) {
-                double discount = bestPromotion.calculateDiscount(sale);
+                discountAmount = bestPromotion.calculateDiscount(sale);
                 sale.setAppliedPromotionName(bestPromotion.getName());
-                sale.setDiscountAmount(discount);
-                sale.setTotalAmount(totalAmount - discount);
+                sale.setDiscountAmount(discountAmount);
             }
         }
 
-        // Process automatic or extended warranty for consoles
+        double warrantyCost = 0.0;
         if (warrantyService != null) {
             for (Product item : products) {
                 if (item instanceof Console) {
                     if (wantsExtendedWarranty) {
                         var extended = warrantyService.assignExtendedWarranty(item, sale, LocalDate.now());
-                        sale.setTotalAmount(sale.getTotalAmount() + extended.getAdditionalCost());
+                        warrantyCost += extended.getAdditionalCost();
                     } else {
                         warrantyService.assignBasicWarranty(item, sale, LocalDate.now());
                     }
                 }
             }
         }
+
+        double finalTotal = subtotal - discountAmount + warrantyCost;
+        sale.setTotalAmount(finalTotal);
+
 
         for (Product item : products) {
             if (item instanceof Accessory) {
@@ -116,9 +118,9 @@ public class SaleService {
     }
 
     /**
-     * Retrieves all recorded sales from storage.
+     * Retrieves all recorded sales.
      *
-     * @return a list of all {@link Sale} instances
+     * @return list of sales
      */
     public List<Sale> listAllSales() {
         return saleRepository.loadSales();

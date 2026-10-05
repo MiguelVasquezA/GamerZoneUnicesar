@@ -143,38 +143,49 @@ public class Sale implements Serializable{
     }
 
     /**
-     * Generates a formatted text receipt containing sale details, item list,
-     * subtotal, applied promotion discount, and total final price.
+     * Generates a formatted text receipt for the sale.
      *
-     * @return Formatted receipt string in English.
+     * @return formatted receipt string
      */
     public String generateReceipt() {
         StringBuilder sb = new StringBuilder();
         sb.append("=========================================\n");
-        sb.append("              SALE RECEIPT               \n");
+        sb.append("           GAMERZONE UNICESAR            \n");
+        sb.append("             SALE RECEIPT                \n");
         sb.append("=========================================\n");
-        sb.append("Sale ID    : ").append(saleId).append("\n");
-        sb.append("Date       : ").append(date).append("\n");
-        sb.append("Client     : ").append(client).append("\n");
-        sb.append("Seller     : ").append(seller).append("\n");
+        sb.append("Sale ID: ").append(saleId).append("\n");
+        sb.append("Date: ").append(date).append("\n");
+        sb.append("Client ID: ").append(client).append("\n");
+        sb.append("Seller ID: ").append(seller).append("\n");
         sb.append("-----------------------------------------\n");
-        sb.append("PRODUCTS:\n");
+        sb.append("ITEMS:\n");
 
         double subtotal = 0.0;
         if (products != null) {
             for (Product p : products) {
                 sb.append(" - ").append(p.getTitle())
-                        .append(" | $").append(String.format("%.2f", p.getPrice())).append("\n");
+                        .append(" ($").append(String.format("%.2f", p.getPrice())).append(")\n");
                 subtotal += p.getPrice();
             }
         }
 
         sb.append("-----------------------------------------\n");
-        sb.append(String.format("Subtotal    : $%.2f\n", subtotal));
-        sb.append("Promotion   : ").append(appliedPromotionName != null ? appliedPromotionName : "None").append("\n");
-        sb.append(String.format("Discount    : -$%.2f\n", discountAmount));
+        sb.append("Subtotal: $").append(String.format("%.2f", subtotal)).append("\n");
+
+        if (appliedPromotionName != null && !appliedPromotionName.isEmpty()) {
+            sb.append("Discount (").append(appliedPromotionName).append("): -$")
+                    .append(String.format("%.2f", discountAmount)).append("\n");
+        } else {
+            sb.append("Discount: $0.00\n");
+        }
+
+        double warrantyCost = totalAmount - (subtotal - discountAmount);
+        if (warrantyCost > 0) {
+            sb.append("Extended Warranty Cost: +$").append(String.format("%.2f", warrantyCost)).append("\n");
+        }
+
         sb.append("-----------------------------------------\n");
-        sb.append(String.format("TOTAL FINAL : $%.2f\n", totalAmount));
+        sb.append("TOTAL FINAL: $").append(String.format("%.2f", totalAmount)).append("\n");
         sb.append("=========================================\n");
 
         return sb.toString();

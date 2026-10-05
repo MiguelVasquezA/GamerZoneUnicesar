@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * inventory restoration (both products and accessories), and monthly balance generation.
  *
  * @author Desarrolladora 2
- * @version 1.3
+ * @version 1.5
  */
 public class ReturnService {
 
@@ -88,9 +88,9 @@ public class ReturnService {
             }
         }
 
-        // 5. Create the return instance using the exact parameters of the Return model constructor
+        // 5. Create the return instance using the exact constructor parameters of Return model
         String returnId = "RET-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-        Return newReturn = new Return(returnId, LocalDate.now(), sale, productsToReturn, reason);
+        Return newReturn = new Return(returnId, sale, productsToReturn, reason, LocalDate.now());
 
         // 6. Persist the return
         List<Return> allReturns = returnRepository.loadAll();

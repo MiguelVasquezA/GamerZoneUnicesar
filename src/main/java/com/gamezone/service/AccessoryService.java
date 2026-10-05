@@ -1,27 +1,26 @@
 package com.gamezone.service;
 
 import com.gamezone.model.Accessory;
-import com.gamezone.model.Controller;
-import com.gamezone.model.Cable;
-import com.gamezone.model.Memory;
 import com.gamezone.persistence.AccessoryRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * Service class for managing business logic related to accessories.
+ * Service responsible for managing accessory inventory, stock updates,
+ * reductions, and restorations during sales and returns.
  *
  * @author Desarrolladora 2
- * @version 1.2
+ * @version 1.0
  */
 public class AccessoryService {
-    private AccessoryRepository repository;
-    private List<Accessory> accessories;
+
+    private final AccessoryRepository repository;
+    private final List<Accessory> accessories;
 
     /**
-     * Constructs the AccessoryService injecting the repository and loading data.
-     * @param repository The accessory repository.
+     * Constructs the AccessoryService and loads initial accessories from repository.
+     *
+     * @param repository the accessory persistence repository
      */
     public AccessoryService(AccessoryRepository repository) {
         this.repository = repository;
@@ -29,89 +28,73 @@ public class AccessoryService {
     }
 
     /**
-     * Registers and saves a new controller.
+     * Returns the full list of registered accessories.
+     *
+     * @return list of accessories
      */
-    public void registerController(String id, double price, int stock, String title, List<String> compatibleConsoleIds, String connectionType) {
-        Controller controller = new Controller(id, price, stock, title, compatibleConsoleIds, connectionType);
-        accessories.add(controller);
-        repository.saveAll(accessories);
-    }
-
-    /**
-     * Registers and saves a new cable.
-     */
-    public void registerCable(String id, double price, int stock, String title, List<String> compatibleConsoleIds, String connectorType, double length) {
-        Cable cable = new Cable(id, price, stock, title, compatibleConsoleIds, connectorType, length);
-        accessories.add(cable);
-        repository.saveAll(accessories);
-    }
-
-    /**
-     * Registers and saves a new memory.
-     */
-    public void registerMemory(String id, double price, int stock, String title, List<String> compatibleConsoleIds, int capacity, String memoryType) {
-        Memory memory = new Memory(id, price, stock, title, compatibleConsoleIds, capacity, memoryType);
-        accessories.add(memory);
-        repository.saveAll(accessories);
-    }
-
-    /**
-     * Returns all registered accessories.
-     */
-    public List<Accessory> listAllAccessories() {
+    public List<Accessory> listAccessories() {
         return accessories;
     }
 
     /**
-     * Filters accessories by their specific type class name.
-     */
-    public List<Accessory> listAccessoriesByType(String type) {
-        return accessories.stream()
-                .filter(a -> a.getClass().getSimpleName().equalsIgnoreCase(type))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Finds accessories compatible with a specific console ID.
-     */
-    public List<Accessory> findAccessoriesCompatibleWith(String consoleId) {
-        return accessories.stream()
-                .filter(a -> a.getCompatibleConsoleIds() != null && a.getCompatibleConsoleIds().contains(consoleId))
-                .collect(Collectors.toList());
-    }
-
-    /**
      * Finds an accessory by its unique identifier.
+     *
+     * @param id the accessory ID
+     * @return the Accessory object, or null if not found
      */
     public Accessory findById(String id) {
         return accessories.stream()
-                .filter(a -> a.getId().equals(id))
+                .filter(acc -> acc.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }
 
     /**
-     * Updates the stock of an accessory (decreases stock).
+     * Updates the stock of a specific accessory and persists changes.
+     *
+     * @param id the accessory ID
+     * @param newStock the new stock quantity
      */
-    public void updateStock(String accessoryId, int quantity) {
-        Accessory acc = findById(accessoryId);
-        if (acc != null) {
-            acc.setStock(acc.getStock() - quantity);
+    public void updateStock(String id, int newStock) {
+        Accessory accessory = findById(id);
+        if (accessory != null) {
+            accessory.setStock(newStock);
             repository.saveAll(accessories);
         }
     }
 
     /**
-     * Restores the stock of a specific accessory by adding quantity back (used in returns).
+     * Reduces the stock of an accessory by a given quantity and persists changes.
      *
-     * @param accessoryId the unique identifier of the accessory
-     * @param quantity the quantity to restore
+     * @param id the accessory ID
+     * @param quantity the quantity to subtract
      */
-    public void restoreStock(String accessoryId, int quantity) {
-        Accessory acc = findById(accessoryId);
-        if (acc != null) {
-            acc.setStock(acc.getStock() + quantity);
+    public void reduceStock(String id, int quantity) {
+        Accessory accessory = findById(id);
+        if (accessory != null) {
+            int updatedStock = Math.max(0, accessory.getStock() - quantity);
+            accessory.setStock(updatedStock);
             repository.saveAll(accessories);
         }
+    }
+
+    /**
+     * Restores stock quantity for an accessory when a return is processed.
+     *
+     * @param accessoryId ID of the accessory to replenish
+     * @param quantity quantity to add back to stock
+     * @return true if found and updated, false otherwise
+     */
+    public boolean restoreStock(String accessoryId, int quantity) {
+        if (accessoryId == null || quantity <= 0) {
+            return false;
+        }
+        Accessory accessory = findById(accessoryId);
+        if (accessory != null) {
+            accessory.setStock(accessory.getStock() + quantity);
+            repository.saveAll(accessories);
+            return true;
+        }
+        return false;
     }
 }

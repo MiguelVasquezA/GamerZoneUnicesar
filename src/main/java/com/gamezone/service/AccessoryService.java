@@ -11,6 +11,9 @@ import java.util.stream.Collectors;
 
 /**
  * Service class for managing business logic related to accessories.
+ *
+ * @author Desarrolladora 2
+ * @version 1.2
  */
 public class AccessoryService {
     private AccessoryRepository repository;
@@ -88,12 +91,26 @@ public class AccessoryService {
     }
 
     /**
-     * Updates the stock of an accessory.
+     * Updates the stock of an accessory (decreases stock).
      */
     public void updateStock(String accessoryId, int quantity) {
         Accessory acc = findById(accessoryId);
         if (acc != null) {
             acc.setStock(acc.getStock() - quantity);
+            repository.saveAll(accessories);
+        }
+    }
+
+    /**
+     * Restores the stock of a specific accessory by adding quantity back (used in returns).
+     *
+     * @param accessoryId the unique identifier of the accessory
+     * @param quantity the quantity to restore
+     */
+    public void restoreStock(String accessoryId, int quantity) {
+        Accessory acc = findById(accessoryId);
+        if (acc != null) {
+            acc.setStock(acc.getStock() + quantity);
             repository.saveAll(accessories);
         }
     }

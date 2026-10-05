@@ -4,132 +4,143 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Represents a product return transaction within the GameZone system.
- * Manages the returned products from a sale, calculates refund amounts,
- * and generates return receipts.
+ * Class representing a product return transaction.
+ * Calculates proportional refund amounts when discounts were applied to the original sale.
  *
  * @author Miguel Vasquez
- * @version 1.0
+ * @version 1.2
  */
 public class Return {
-
     private String id;
-    private LocalDate returnDate;
     private Sale sale;
-    private List<Product> returnedProducts;
+    private List<Product> returnedItems;
     private String reason;
+    private LocalDate returnDate;
     private double refundAmount;
 
     /**
-     * Constructs a Return instance and automatically calculates the total refund amount.
+     * Constructs a Return instance and calculates the proportional refund amount.
      *
-     * @param id               unique identifier for the return
-     * @param returnDate       date when the return was requested
-     * @param sale             associated original sale transaction
-     * @param returnedProducts list of products being returned
-     * @param reason           reason or justification for the return
+     * @param id            unique return identifier
+     * @param sale          original sale transaction reference
+     * @param returnedItems list of products being returned
+     * @param reason        return justification
+     * @param returnDate    date of the return
      */
-    public Return(String id, LocalDate returnDate, Sale sale, List<Product> returnedProducts, String reason) {
+    public Return(String id, Sale sale, List<Product> returnedItems, String reason, LocalDate returnDate) {
         this.id = id;
-        this.returnDate = returnDate;
         this.sale = sale;
-        this.returnedProducts = returnedProducts;
+        this.returnedItems = returnedItems;
         this.reason = reason;
+        this.returnDate = returnDate;
         this.refundAmount = calculateRefundAmount();
     }
 
-    /**
-     * Gets the return identifier.
-     *
-     * @return return ID
-     */
     public String getId() {
         return id;
     }
 
-    /**
-     * Gets the date when the return was registered.
-     *
-     * @return return date
-     */
-    public LocalDate getReturnDate() {
-        return returnDate;
-    }
-
-    /**
-     * Gets the associated original sale.
-     *
-     * @return original sale
-     */
     public Sale getSale() {
         return sale;
     }
 
-    /**
-     * Gets the list of products included in this return.
-     *
-     * @return list of returned products
-     */
-    public List<Product> getReturnedProducts() {
-        return returnedProducts;
+    public List<Product> getReturnedItems() {
+        return returnedItems;
     }
 
-    /**
-     * Gets the reason for the return.
-     *
-     * @return return reason
-     */
     public String getReason() {
         return reason;
     }
 
-    /**
-     * Gets the total calculated refund amount.
-     *
-     * @return total refund amount
-     */
+    public LocalDate getReturnDate() {
+        return returnDate;
+    }
+
     public double getRefundAmount() {
         return refundAmount;
     }
 
     /**
-     * Calculates the total refund amount by summing the prices of all returned products.
+     * Calculates the total refund amount proportionally applying original sale discounts.
+     * Formula per item: price - (price * totalDiscount / itemsSubtotal)
      *
-     * @return total calculated refund amount
+     * @return total proportional refund amount
      */
     public double calculateRefundAmount() {
-        if (returnedProducts == null || returnedProducts.isEmpty()) {
+        if (returnedItems == null || returnedItems.isEmpty() || sale == null) {
             return 0.0;
         }
-        double total = 0.0;
-        for (Product product : returnedProducts) {
-            if (product != null) {
-                total += product.getPrice();
+
+        // Calculate original items subtotal
+        double saleSubtotal = 0.0;
+        if (sale.getProducts() != null) {
+            for (Product p : sale.getProducts()) {
+                saleSubtotal += p.getPrice();
             }
         }
-        return total;
+
+        if (saleSubtotal == 0.0) {
+            return 0.0;
+        }
+
+        double totalDiscount = sale.getDiscountAmount();
+        double totalRefund = 0.0;
+
+        for (Product item : returnedItems) {
+            double listPrice = item.getPrice();
+            double itemDiscount = listPrice * (totalDiscount / saleSubtotal);
+            double itemRefund = listPrice - itemDiscount;
+            totalRefund += itemRefund;
+        }
+
+        return totalRefund;
     }
 
     /**
-     * Generates a formatted text receipt containing full details of the return transaction in Spanish.
+     * Generates a formatted return receipt voucher displaying list prices,
+     * proportional discounts, and final refunded amounts.
      *
-     * @return formatted return receipt string
+     * @return formatted return receipt text
      */
     public String generateReturnReceipt() {
         StringBuilder sb = new StringBuilder();
-        sb.append("=== COMPROBANTE DE DEVOLUCIÓN ===\n");
-        sb.append("ID Devolución: ").append(id).append("\n");
-        sb.append("Fecha: ").append(returnDate).append("\n");
-        sb.append("ID Venta Original: ").append(sale != null ? sale.getSaleId() : "N/A").append("\n");
-        sb.append("Motivo: ").append(reason).append("\n");
-        sb.append("Productos Devueltos:\n");
-        if (returnedProducts != null) {
-            for (Product p : returnedProducts) {
-                sb.append(" - ").append(p.getTitle()).append(" ($").append(p.getPrice()).append(")\n");
+        sb.append("=========================================\n");
+        sb.append("           GAMERZONE UNICESAR            \n");
+        sb.append("             RETURN VOUCHER              \n");
+        sb.append("=========================================\n");
+        sb.append("Return ID: ").append(id).append("\n");
+        sb.append("Date: ").append(returnDate).append("\n");
+        sb.append("Original Sale ID: ").append(sale != null ? sale.getSaleId() : "N/A").append("\n");
+        sb.append("Reason: ").append(reason).append("\n");
+        sb.append("-----------------------------------------\n");
+        sb.append("RETURNED ITEMS:\n");
+
+        double saleSubtotal = 0.0;
+        if (sale != null && sale.getProducts() != null) {
+            for (Product p : sale.getProducts()) {
+                saleSubtotal += p.getPrice();
             }
         }
-        sb.append(String.format("Monto Reembolsado Total: $%.2f\n", refundAmount));
-        sb.append("=================================");
+
+        double totalDiscount = (sale != null) ? sale.getDiscountAmount() : 0.0;
+
+        if (returnedItems != null) {
+            for (Product item : returnedItems) {
+                double listPrice = item.getPrice();
+                double itemDiscount = (saleSubtotal > 0) ? listPrice * (totalDiscount / saleSubtotal) : 0.0;
+                double itemRefund = listPrice - itemDiscount;
+
+                sb.append(" - ").append(item.getTitle()).append("\n")
+                        .append("   List Price: $").append(String.format("%.2f", listPrice))
+                        .append(" | Discount: -$").append(String.format("%.2f", itemDiscount))
+                        .append(" | Refunded: $").append(String.format("%.2f", itemRefund)).append("\n");
+            }
+        }
+
+        sb.append("-----------------------------------------\n");
+        sb.append("TOTAL REFUNDED: $").append(String.format("%.2f", refundAmount)).append("\n");
+        sb.append("=========================================\n");
+
         return sb.toString();
     }
 }

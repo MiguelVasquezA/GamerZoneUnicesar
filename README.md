@@ -1,35 +1,40 @@
-# GamerZone Unicesar - Management System
+# GamerZone Unicesar - Integrated Management System
 
-An object-oriented Java console application designed to manage products, accessories, persons, sales, promotional discounts, product returns, and warranties under clean architecture principles (Service-Repository Pattern).
+An object-oriented Java console application designed to manage products, accessories, customers, sellers, sales, promotional discounts, warranties, and product returns under a clean 4-layer architecture (Service-Repository Pattern).
 
 ---
 
-## 🚀 Features & Modules
+## 🚀 Integrated System Features
 
-* **Product Management**: Support for Video Games and Consoles.
-* **Accessory Management**: Register and filter Controllers, Cables, and Memory units with real-time console compatibility checks.
-* **Person Management**: Unified registry and distinction between Customers and Sellers.
+* **Product & Accessory Management**: Support for Video Games, Consoles, and Accessories (Controllers, Cables, Memory units) with real-time console compatibility checks.
+* **Person Registry**: Unified entity management distinguishing Customers and Sellers.
 * **Promotions Engine**:
-  * **General Percentage Discount**: Standard percentage discount applied across transactions (`PercentageDiscount`).
-  * **Category Discount**: Targeted discounts applied specifically to games or consoles (`CategoryDiscount`).
-  * **Bulk Purchase Discount**: Volume-based discounts triggered when buying a minimum item quantity (`BulkPurchaseDiscount`).
-  * **Best Promotion Rule**: Evaluates all active promotions for a sale and automatically applies the one yielding the maximum discount.
-* **Sales Processing**: Comprehensive transaction pipeline updating item inventory, calculating totals, applying optimal discounts, issuing console warranties, and printing receipts.
-* **Returns Management**: Registration and processing of product returns within warranty or standard time windows, adjusting inventory and generating return vouchers.
+  * **General Percentage Discount**: Universal percentage discount applied across items (`PercentageDiscount`).
+  * **Category Discount**: Targeted percentage discount for Video Games, Consoles, or Accessories (`CategoryDiscount`).
+  * **Bulk Purchase Discount**: Volume-based discounts triggered when buying a minimum item count (`BulkPurchaseDiscount`).
+  * **Best Promotion Rule**: Evaluates active promotions dynamically on sales subtotals and applies the one yielding maximum savings (`findBestPromotionFor`).
+* **Unified Sales Processing**:
+  * Sequential execution pipeline: stock validation, subtotal calculation, promotion evaluation, warranty issuance, and total calculation.
+  * Formatted English sale receipts displaying subtotal, applied promotion name/discount, warranty fees, and final total.
 * **Warranty Module**:
-  * **Basic Warranty**: Automatically issued for Console sales (6-month coverage at no extra cost).
-  * **Extended Warranty**: Optional 12-month coverage covering accidental damage (adds a 10% fee based on product price).
-  * **Warranty Queries**: Interactive listing of active warranties, warranties expiring within 30 days, and search by Product/Sale ID.
+  * **Basic Warranty**: Automatic 6-month coverage at no extra cost for console purchases.
+  * **Extended Warranty**: Optional 12-month coverage covering accidental damage (10% additional fee).
+  * Interactive queries for active warranties, expiring warranties (30 days), and search by Product/Sale ID.
+* **Returns & Financials**:
+  * Proportional refund calculations on discounted sales preventing revenue losses.
+  * Automatic inventory restoration for products and accessories.
+  * Automated warranty revocation on returned consoles.
+  * Financial reporting generating monthly gross sales, total returns, and net balance.
 
 ---
 
-## 🛠 Architecture & Project Structure
+## 🛠 Layered Architecture & Project Structure
 
-The application strictly adheres to a **4-Layered Service-Repository Architecture**:
+The project strictly follows the required **UI → Service → Persistence → Model** dependency hierarchy:
 
 ```text
 src/main/java/com/gamezone/
-├── model/           # Business domain models (Product, Sale, Warranty, Return, Promotion, etc.)
-├── persistence/     # File storage handlers and CSV/Text repository implementations
-├── service/         # Business logic layer (SaleService, WarrantyService, ReturnService, etc.)
-└── ui/              # Console user interface (ConsoleMenu) and application entry point (Main)
+├── model/           # Business domain entities (Product, Sale, Warranty, Return, Promotion, etc.)
+├── persistence/     # File handlers, text/CSV repositories, and data storage logic
+├── service/         # Core business logic layer (SaleService, ReturnService, WarrantyService, etc.)
+└── ui/              # Interactive console interface (ConsoleMenu) and application entry point (Main)

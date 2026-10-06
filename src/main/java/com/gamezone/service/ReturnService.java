@@ -13,10 +13,11 @@ import java.util.stream.Collectors;
 
 /**
  * Service responsible for managing return business logic, including validations,
- * inventory restoration (both products and accessories), and monthly balance generation.
+ * inventory restoration (both products and accessories), monthly balance generation,
+ * and warranty cancellation integration (Task A7).
  *
  * @author Desarrolladora 2
- * @version 1.5
+ * @version 1.6
  */
 public class ReturnService {
 
@@ -24,6 +25,7 @@ public class ReturnService {
     private final SaleService saleService;
     private final ProductService productService;
     private final AccessoryService accessoryService;
+    private final WarrantyService warrantyService; // Integrado para la tarea A7
 
     /**
      * Constructs a new ReturnService with its required repository and service dependencies.
@@ -32,12 +34,14 @@ public class ReturnService {
      * @param saleService the service to handle and verify sales
      * @param productService the service to manage product inventory
      * @param accessoryService the service to manage accessory inventory
+     * @param warrantyService the service to manage and cancel warranties
      */
-    public ReturnService(ReturnRepository returnRepository, SaleService saleService, ProductService productService, AccessoryService accessoryService) {
+    public ReturnService(ReturnRepository returnRepository, SaleService saleService, ProductService productService, AccessoryService accessoryService, WarrantyService warrantyService) {
         this.returnRepository = returnRepository;
         this.saleService = saleService;
         this.productService = productService;
         this.accessoryService = accessoryService;
+        this.warrantyService = warrantyService;
     }
 
     /**
@@ -86,6 +90,11 @@ public class ReturnService {
             } else {
                 productService.updateStock(product.getId(), product.getStock() + 1);
             }
+        }
+
+        // 4.1. Cancel associated warranty if it exists (Task A7 - Anulación de Garantía)
+        if (warrantyService != null) {
+            warrantyService.cancelWarrantyBySale(saleId);
         }
 
         // 5. Create the return instance using the exact constructor parameters of Return model

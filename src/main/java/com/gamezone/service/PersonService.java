@@ -31,17 +31,17 @@ public class PersonService {
      * @param person the person object to be added
      */
     public void addPerson(Person person) {
-        PersonValidator.validatePerson(person);
+        if (person == null) {
+            throw new IllegalArgumentException("Person cannot be null.");
+        }
+
+        // Delegar validación de datos primitivos al validador
+        PersonValidator.validatePersonData(person.getIdentification(), person.getName(), person.getPhoneNumber());
 
         List<Person> persons = fileHandler.loadPersons();
 
-        // Validar si ya existe una persona con el mismo ID
-        boolean exists = persons.stream()
-                .anyMatch(p -> p.getIdentification().equals(person.getIdentification()));
-
-        if (exists) {
-            throw new BusinessRuleException("A person with identification " + person.getIdentification() + " already exists.");
-        }
+        // Delegar validación de unicidad al validador
+        PersonValidator.validateUniquePerson(persons, person.getIdentification());
 
         persons.add(person);
         fileHandler.savePersons(persons);
@@ -54,12 +54,13 @@ public class PersonService {
      * @return the person object if found
      */
     public Person searchPerson(String id) {
-        PersonValidator.validateId(id);
-
         List<Person> persons = fileHandler.loadPersons();
-        return persons.stream()
+        Person person = persons.stream()
                 .filter(p -> p.getIdentification().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Person not found with identification: " + id));
+                .orElse(null);
+
+        PersonValidator.validatePersonExists(person, id);
+        return person;
     }
 }

@@ -1,8 +1,11 @@
 package com.gamezone.service;
 
+import com.gamezone.exceptions.BusinessRuleException;
+import com.gamezone.exceptions.InvalidDataException;
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
 import com.gamezone.persistence.SaleRepository;
+import com.gamezone.validation.SaleValidator;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,7 +16,7 @@ import java.util.UUID;
  * and warranty assignments during sale registration.
  *
  * @author Desarrolladora 2
- * @version 1.8
+ * @version 1.9
  */
 public class SaleService {
 
@@ -56,9 +59,8 @@ public class SaleService {
      * @return the created Sale object
      */
     public Sale registerSale(String clientId, List<Product> products, double discountAmount, boolean hasExtendedWarranty) {
-        if (products == null || products.isEmpty()) {
-            throw new IllegalArgumentException("La venta debe contener al menos un producto.");
-        }
+        // Delegar validaciones al validador
+        SaleValidator.validateSaleData(clientId, products, discountAmount);
 
         // 1. Update inventory stock for each purchased item
         for (Product p : products) {
@@ -72,6 +74,11 @@ public class SaleService {
         // 2. Generate unique sale ID and calculate financial amounts
         String saleId = "SALE-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
         double subtotal = products.stream().mapToDouble(Product::getPrice).sum();
+
+        if (discountAmount > subtotal) {
+            throw new BusinessRuleException("Discount amount cannot exceed the subtotal of the sale.");
+        }
+
         double totalAmount = subtotal - discountAmount;
 
         // 3. Build Sale instance matching the updated 7-argument constructor

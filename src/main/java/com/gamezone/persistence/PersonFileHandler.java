@@ -1,5 +1,6 @@
 package com.gamezone.persistence;
 
+import com.gamezone.exception.PersistenceException;
 import com.gamezone.model.Person;
 
 import java.io.*;
@@ -7,14 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * handles file persistence operations for person objects,
+ * Handles file persistence operations for person objects,
  * allowing them to be saved and loaded using object serialization.
  */
 public class PersonFileHandler {
     private final String filePath;
 
     /**
-     * creates a new person file handler with the specified file path
+     * Creates a new person file handler with the specified file path
      *
      * @param filePath the path of the file where persons are stored
      */
@@ -31,7 +32,7 @@ public class PersonFileHandler {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
             oos.writeObject(persons);
         } catch (IOException e) {
-            System.err.println("Error saving persons to file: " + e.getMessage());
+            throw new PersistenceException("Error saving persons to file: " + filePath, e);
         }
     }
 
@@ -51,8 +52,7 @@ public class PersonFileHandler {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             return (List<Person>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error loading persons from file: " + e.getMessage());
-            return new ArrayList<>();
+            throw new PersistenceException("Error loading persons from file: " + filePath, e);
         }
     }
 }

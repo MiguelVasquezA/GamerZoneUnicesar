@@ -4,7 +4,7 @@ An object-oriented Java console application designed to manage products, accesso
 
 ---
 
-## 🚀 Integrated System Features
+## Integrated System Features
 
 * **Product & Accessory Management**: Support for Video Games, Consoles, and Accessories (Controllers, Cables, Memory units) with real-time console compatibility checks.
 * **Person Registry**: Unified entity management distinguishing Customers and Sellers.
@@ -28,7 +28,7 @@ An object-oriented Java console application designed to manage products, accesso
 
 ---
 
-## 🛠 Layered Architecture & Project Structure
+## Layered Architecture & Project Structure
 
 The project strictly follows the required **UI → Service → Persistence → Model** dependency hierarchy:
 

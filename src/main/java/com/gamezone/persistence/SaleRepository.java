@@ -1,5 +1,6 @@
 package com.gamezone.persistence;
 
+import com.gamezone.exception.PersistenceException;
 import com.gamezone.model.Sale;
 
 import java.io.File;
@@ -39,14 +40,14 @@ public class SaleRepository {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
             oos.writeObject(sales);
         } catch (IOException e) {
-            System.err.println("Error saving sales to file: " + e.getMessage());
+            throw new PersistenceException("Error saving sales to file: " + filePath, e);
         }
     }
 
     /**
      * Loads the list of sales from the storage file.
      *
-     * @return the list of stored Sale objects, or an empty list if the file does not exist or an error occurs
+     * @return the list of stored Sale objects, or an empty list if the file does not exist
      */
     @SuppressWarnings("unchecked")
     public List<Sale> loadSales() {
@@ -61,7 +62,7 @@ public class SaleRepository {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             sales = (List<Sale>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error loading sales from file: " + e.getMessage());
+            throw new PersistenceException("Error loading sales from file: " + filePath, e);
         }
         return sales;
     }

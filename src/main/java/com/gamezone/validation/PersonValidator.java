@@ -11,7 +11,7 @@ import java.util.List;
  * Dedicated validator class for customer and seller domain rules.
  *
  * @author Miguel Vasquez
- * @version 1.1
+ * @version 1.3
  */
 public class PersonValidator {
 
@@ -20,23 +20,17 @@ public class PersonValidator {
      *
      * @param id    person document ID
      * @param name  full name
-     * @param email email address
      * @param phone phone number
      */
-    public static void validatePersonData(String id, String name, String email, String phone) {
+    public static void validatePersonData(String id, String name, String phone) {
         if (id == null || id.trim().isEmpty()) {
-            throw new InvalidDataException("ID Card", "Identification number cannot be empty.");
+            throw new InvalidDataException("Identification", "Identification number cannot be empty.");
         }
         if (name == null || name.trim().isEmpty()) {
             throw new InvalidDataException("Name", "Full name cannot be empty.");
         }
         if (phone == null || phone.trim().isEmpty()) {
             throw new InvalidDataException("Phone", "Phone number cannot be empty.");
-        }
-        if (email != null && !email.trim().isEmpty()) {
-            if (!email.contains("@") || !email.contains(".")) {
-                throw new InvalidDataException("Email", "Invalid email address format.");
-            }
         }
     }
 
@@ -60,7 +54,8 @@ public class PersonValidator {
      */
     public static void validateUniquePerson(List<Person> existing, String newId) {
         if (existing != null) {
-            boolean exists = existing.stream().anyMatch(p -> p.getIdentification().equalsIgnoreCase(newId));
+            boolean exists = existing.stream()
+                    .anyMatch(p -> p.getIdentification() != null && p.getIdentification().equalsIgnoreCase(newId));
             if (exists) {
                 throw new BusinessRuleException("A person with ID '" + newId + "' is already registered.");
             }

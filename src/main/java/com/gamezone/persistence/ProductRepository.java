@@ -1,6 +1,6 @@
 package com.gamezone.persistence;
 
-import com.gamezone.exception.PersistenceException;
+import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Console;
 import com.gamezone.model.Product;
 import com.gamezone.model.VideoGame;

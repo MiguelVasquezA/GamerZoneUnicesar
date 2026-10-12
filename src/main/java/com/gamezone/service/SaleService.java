@@ -1,8 +1,10 @@
 package com.gamezone.service;
 
+import com.gamezone.exceptions.BusinessRuleException;
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
 import com.gamezone.persistence.SaleRepository;
+import com.gamezone.validation.SaleValidator;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,7 +15,7 @@ import java.util.UUID;
  * and warranty assignments during sale registration.
  *
  * @author Desarrolladora 2
- * @version 1.8
+ * @version 1.9
  */
 public class SaleService {
 
@@ -21,20 +23,17 @@ public class SaleService {
     private final ProductService productService;
     private final AccessoryService accessoryService;
     private final WarrantyService warrantyService;
+    private final PersonService personService; // Añadido para buscar el cliente y vendedor si es necesario
 
     /**
      * Constructs a SaleService with its required repository and service dependencies.
-     *
-     * @param saleRepository repository to persist and load sales
-     * @param productService service to manage product inventory
-     * @param accessoryService service to manage accessory inventory
-     * @param warrantyService service to assign basic or extended warranties
      */
-    public SaleService(SaleRepository saleRepository, ProductService productService, AccessoryService accessoryService, WarrantyService warrantyService) {
+    public SaleService(SaleRepository saleRepository, ProductService productService, AccessoryService accessoryService, WarrantyService warrantyService, PersonService personService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.accessoryService = accessoryService;
         this.warrantyService = warrantyService;
+        this.personService = personService;
     }
 
     /**
@@ -48,17 +47,14 @@ public class SaleService {
 
     /**
      * Registers a new sale, updates product/accessory stock, and assigns warranties.
-     *
-     * @param clientId the client ID making the purchase
-     * @param products the list of products or accessories purchased
-     * @param discountAmount any applicable discount amount
-     * @param hasExtendedWarranty true if the customer opts for extended warranty
-     * @return the created Sale object
      */
-    public Sale registerSale(String clientId, List<Product> products, double discountAmount, boolean hasExtendedWarranty) {
-        if (products == null || products.isEmpty()) {
-            throw new IllegalArgumentException("La venta debe contener al menos un producto.");
-        }
+    public Sale registerSale(String clientId, String sellerId, List<Product> products, double discountAmount, boolean hasExtendedWarranty) {
+        // Validar que el cliente y el vendedor existan a través del personService
+        Object customer = personService.searchPerson(clientId);
+        Object seller = personService.searchPerson(sellerId);
+
+        // Delegar validación a SaleValidator con los 3 parámetros requeridos
+        SaleValidator.validateSaleData(customer, seller, products);
 
         // 1. Update inventory stock for each purchased item
         for (Product p : products) {
@@ -72,9 +68,14 @@ public class SaleService {
         // 2. Generate unique sale ID and calculate financial amounts
         String saleId = "SALE-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
         double subtotal = products.stream().mapToDouble(Product::getPrice).sum();
+
+        if (discountAmount > subtotal) {
+            throw new BusinessRuleException("Discount amount cannot exceed the subtotal of the sale.");
+        }
+
         double totalAmount = subtotal - discountAmount;
 
-        // 3. Build Sale instance matching the updated 7-argument constructor
+        // 3. Build Sale instance
         Sale sale = new Sale(
                 saleId,
                 clientId,
@@ -82,7 +83,7 @@ public class SaleService {
                 totalAmount,
                 discountAmount,
                 LocalDate.now().toString(),
-                "System"
+                sellerId
         );
 
         // 4. Assign warranties for each product in the sale

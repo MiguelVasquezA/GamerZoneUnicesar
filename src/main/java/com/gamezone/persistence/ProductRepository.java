@@ -1,6 +1,5 @@
 package com.gamezone.persistence;
 
-import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Console;
 import com.gamezone.model.Product;
 import com.gamezone.model.VideoGame;
@@ -12,7 +11,6 @@ import java.util.List;
 /**
  * Handles file-based persistence for Product objects.
  * Responsible only for reading from and writing to the products data file.
- *
  * @author FC Evento
  * @version 1.0
  */
@@ -22,7 +20,6 @@ public class ProductRepository {
 
     /**
      * Constructs a ProductRepository pointing to the given file path.
-     *
      * @param filePath path to the CSV file used for storage
      */
     public ProductRepository(String filePath) {
@@ -31,7 +28,6 @@ public class ProductRepository {
 
     /**
      * Saves the full list of products to the file, overwriting its previous content.
-     *
      * @param products the list of products to persist
      */
     public void save(List<Product> products) {
@@ -41,13 +37,12 @@ public class ProductRepository {
                 writer.newLine();
             }
         } catch (IOException e) {
-            throw new PersistenceException("Error saving products to file: " + filePath, e);
+            System.out.println("Error saving products: " + e.getMessage());
         }
     }
 
     /**
      * Loads the list of products from the file.
-     *
      * @return the list of products found in the file, or an empty list if the file does not exist
      */
     public List<Product> load() {
@@ -66,7 +61,7 @@ public class ProductRepository {
                 }
             }
         } catch (IOException e) {
-            throw new PersistenceException("Error loading products from file: " + filePath, e);
+            System.out.println("Error loading products: " + e.getMessage());
         }
 
         return products;
@@ -74,7 +69,6 @@ public class ProductRepository {
 
     /**
      * Converts a Product into its CSV line representation.
-     *
      * @param product the product to convert
      * @return a CSV-formatted line
      */
@@ -105,7 +99,6 @@ public class ProductRepository {
 
     /**
      * Converts a CSV line back into a Product instance.
-     *
      * @param line the CSV-formatted line
      * @return the reconstructed Product
      */
@@ -126,7 +119,7 @@ public class ProductRepository {
             String brand = fields[5];
             String model = fields[6];
             String generation = fields[7];
-
+        
             return new Console(id, price, stock, title, brand, generation, model);
         }
         throw new IllegalArgumentException("Unknown product type in file: " + type);

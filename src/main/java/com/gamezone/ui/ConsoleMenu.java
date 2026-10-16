@@ -1,29 +1,20 @@
 package com.gamezone.ui;
 
-import com.gamezone.exceptions.BusinessRuleException;
-import com.gamezone.exceptions.GameZoneException;
-import com.gamezone.exceptions.InvalidDataException;
-import com.gamezone.exceptions.PersistenceException;
-import com.gamezone.exceptions.ResourceNotFoundException;
-import com.gamezone.model.Product;
 import com.gamezone.model.Return;
 import com.gamezone.model.Warranty;
-import com.gamezone.service.AccessoryService;
-import com.gamezone.service.ProductService;
-import com.gamezone.service.ReturnService;
-import com.gamezone.service.SaleService;
-import com.gamezone.service.WarrantyService;
+import com.gamezone.service.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 /**
- * Interactive console interface for the GamerZone Unicesar system.
- * Handles user interactions and routes business logic execution with centralized exception handling.
+ * Console user interface for GamerZoneUnicesar application.
+ * Handles user interaction for managing sales, returns, inventory, warranties,
+ * and financial balances.
  *
- * @author Miguel Vasquez
- * @version 2.0
+ * @author Desarrolladora 2
+ * @version 1.5
  */
 public class ConsoleMenu {
 
@@ -37,11 +28,11 @@ public class ConsoleMenu {
     /**
      * Constructs the ConsoleMenu with all required service dependencies.
      *
-     * @param saleService      sale operations service
-     * @param productService   product stock service
+     * @param saleService sale operations service
+     * @param productService product stock service
      * @param accessoryService accessory stock service
-     * @param returnService    return and warranty cancellation service
-     * @param warrantyService  warranty management service
+     * @param returnService return and warranty cancellation service
+     * @param warrantyService warranty management service
      */
     public ConsoleMenu(SaleService saleService, ProductService productService, AccessoryService accessoryService, ReturnService returnService, WarrantyService warrantyService) {
         this.saleService = saleService;
@@ -54,7 +45,6 @@ public class ConsoleMenu {
 
     /**
      * Starts the main interactive loop of the console application.
-     * Encloses menu execution with differentiated try-catch blocks for custom domain exceptions.
      */
     public void start() {
         int option;
@@ -62,26 +52,7 @@ public class ConsoleMenu {
             printHeader();
             printMenuOptions();
             option = readOption();
-
-            try {
-                handleOption(option);
-            } catch (ResourceNotFoundException e) {
-                System.out.println("\n [ERROR 404 - RECURSO NO ENCONTRADO] " + e.getMessage() + " (Código: " + e.getErrorCode() + ")");
-            } catch (BusinessRuleException e) {
-                System.out.println("\n [ERROR 400 - REGLA DE NEGOCIO] " + e.getMessage() + " (Código: " + e.getErrorCode() + ")");
-            } catch (InvalidDataException e) {
-                System.out.println("\n [ERROR 422 - DATO INVÁLIDO] " + e.getMessage() + " (Código: " + e.getErrorCode() + ")");
-            } catch (PersistenceException e) {
-                System.out.println("\n [ERROR 503 - ERROR DE PERSISTENCIA] " + e.getMessage() + " (Código: " + e.getErrorCode() + ")");
-                if (e.getCause() != null) {
-                    System.out.println("   Causa técnica: " + e.getCause().getMessage());
-                }
-            } catch (GameZoneException e) {
-                System.out.println("\n [ERROR DEL SISTEMA] " + e.getMessage() + " (Código: " + e.getErrorCode() + ")");
-            } catch (Exception e) {
-                System.out.println("\n [ERROR INESPERADO] Ocurrió una falla no controlada: " + e.getMessage());
-            }
-
+            handleOption(option);
         } while (option != 0);
     }
 
@@ -137,7 +108,7 @@ public class ConsoleMenu {
     private void listSales() {
         System.out.println("\n--- LISTADO DE VENTAS ---");
         var sales = saleService.listAllSales();
-        if (sales == null || sales.isEmpty()) {
+        if (sales.isEmpty()) {
             System.out.println("No hay ventas registradas.");
         } else {
             sales.forEach(s -> System.out.println("ID Venta: " + s.getSaleId() + " | Fecha: " + s.getDate() + " | Total: $" + s.getTotalAmount()));
@@ -163,19 +134,23 @@ public class ConsoleMenu {
         System.out.print("Ingrese el motivo de la devolución: ");
         String reason = scanner.nextLine();
 
-        Return newReturn = returnService.registerReturn(saleId, productIds, reason);
-        System.out.println("\n¡Devolución registrada y garantía anulada exitosamente!");
-        System.out.println(newReturn.generateReturnReceipt());
+        try {
+            Return newReturn = returnService.registerReturn(saleId, productIds, reason);
+            System.out.println("\n¡Devolución registrada y garantía anulada exitosamente!");
+            System.out.println(newReturn.generateReturnReceipt());
+        } catch (Exception e) {
+            System.out.println("Error al procesar la devolución: " + e.getMessage());
+        }
     }
 
     private void viewReturnsMenu() {
         System.out.println("\n--- LISTADO DE DEVOLUCIONES ---");
         List<Return> returns = returnService.viewAllReturns();
-        if (returns == null || returns.isEmpty()) {
+        if (returns.isEmpty()) {
             System.out.println("No hay devoluciones registradas.");
         } else {
             for (Return r : returns) {
-                System.out.println("Devolución ID: " + r.getId() + " | Venta: " + (r.getSale() != null ? r.getSale().getSaleId() : "N/A") + " | Monto Reembolsado: $" + String.format("%.2f", r.getRefundAmount()) + " | Fecha: " + r.getReturnDate());
+                System.out.println("Devolución ID: " + r.getId() + " | Venta: " + r.getSale().getSaleId() + " | Monto Reembolsado: $" + String.format("%.2f", r.getRefundAmount()) + " | Fecha: " + r.getReturnDate());
             }
         }
     }
@@ -183,10 +158,9 @@ public class ConsoleMenu {
     private void generateMonthlyBalanceMenu() {
         System.out.println("\n--- REPORTE DE BALANCE MENSUAL ---");
         System.out.print("Ingrese el mes (1-12): ");
-        int month = parseIntegerInput(scanner.nextLine(), "Mes");
-
+        int month = Integer.parseInt(scanner.nextLine());
         System.out.print("Ingrese el año (ej. 2026): ");
-        int year = parseIntegerInput(scanner.nextLine(), "Año");
+        int year = Integer.parseInt(scanner.nextLine());
 
         double balance = returnService.generateMonthlyBalance(month, year);
         System.out.println("\nBalance Neto (Ventas - Devoluciones) para el período " + month + "/" + year + ": $" + String.format("%.2f", balance));
@@ -195,20 +169,12 @@ public class ConsoleMenu {
     private void viewWarrantiesMenu() {
         System.out.println("\n--- LISTADO DE GARANTÍAS ---");
         List<Warranty> warranties = warrantyService.listAllWarranties();
-        if (warranties == null || warranties.isEmpty()) {
+        if (warranties.isEmpty()) {
             System.out.println("No hay garantías registradas o vigentes.");
         } else {
             for (Warranty w : warranties) {
                 System.out.println("Garantía ID: " + w.getId() + " | Venta Asociada: " + (w.getSale() != null ? w.getSale().getSaleId() : "N/A"));
             }
-        }
-    }
-
-    private int parseIntegerInput(String input, String fieldName) {
-        try {
-            return Integer.parseInt(input);
-        } catch (NumberFormatException e) {
-            throw new InvalidDataException(fieldName, "Debe ser un número entero válido.");
         }
     }
 }

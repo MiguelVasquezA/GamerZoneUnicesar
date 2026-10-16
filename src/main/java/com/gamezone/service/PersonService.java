@@ -1,11 +1,7 @@
 package com.gamezone.service;
 
-import com.gamezone.exceptions.BusinessRuleException;
-import com.gamezone.exceptions.ResourceNotFoundException;
 import com.gamezone.model.Person;
 import com.gamezone.persistence.PersonFileHandler;
-import com.gamezone.validation.PersonValidator;
-
 import java.util.List;
 
 /**
@@ -14,7 +10,7 @@ import java.util.List;
  */
 public class PersonService {
 
-    private final PersonFileHandler fileHandler;
+    private PersonFileHandler fileHandler;
 
     /**
      * Creates a new person service with the specified file handler.
@@ -31,18 +27,7 @@ public class PersonService {
      * @param person the person object to be added
      */
     public void addPerson(Person person) {
-        if (person == null) {
-            throw new IllegalArgumentException("Person cannot be null.");
-        }
-
-        // Delegar validación de datos primitivos al validador
-        PersonValidator.validatePersonData(person.getIdentification(), person.getName(), person.getPhoneNumber());
-
         List<Person> persons = fileHandler.loadPersons();
-
-        // Delegar validación de unicidad al validador
-        PersonValidator.validateUniquePerson(persons, person.getIdentification());
-
         persons.add(person);
         fileHandler.savePersons(persons);
     }
@@ -51,16 +36,16 @@ public class PersonService {
      * Searches for a person by their identification number.
      *
      * @param id the identification number to search for
-     * @return the person object if found
+     * @return the person object if found, or null otherwise
      */
     public Person searchPerson(String id) {
         List<Person> persons = fileHandler.loadPersons();
-        Person person = persons.stream()
-                .filter(p -> p.getIdentification().equals(id))
-                .findFirst()
-                .orElse(null);
-
-        PersonValidator.validatePersonExists(person, id);
-        return person;
+        for (Person p : persons) {
+            if (p.getIdentification().equals(id)) {
+                return p;
+            }
+        }
+        return null;
     }
 }
+

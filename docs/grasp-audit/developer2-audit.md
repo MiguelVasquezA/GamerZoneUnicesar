@@ -1,49 +1,104 @@
-# GRASP Audit Report - Developer 2 (Persons Module)
+# Developer 2 - Individual GRASP Audit Report
 
-## 1. Scope
-This audit covers the classes and components assigned to Developer 2 under the Persons Module (Workshop 1):
-* **`com.gamezone.model.Person`**: Abstract base class defining common attributes and behavior for store individuals.
-* **`com.gamezone.model.Customer`**: Concrete subclass representing store customers, managing email and purchase history.
-* **`com.gamezone.model.Seller`**: Concrete subclass representing store employees, managing employee codes and work shifts.
-* **`com.gamezone.persistence.PersonFileHandler`**: Persistence component handling object serialization and file operations for persons.
-* **`com.gamezone.service.PersonService`**: Business logic layer coordinating validation, persistence, and retrieval of person entities.
+## 1. Audit Scope
+
+This audit covers the code developed under the responsibility of Developer 2 for the **GameZone Unicesar** system, organized by module and requirement:
+
+- **Persons Module (Workshop 1):** `Person`, `Customer`, `Seller`, `PersonFileHandler`, `PersonService`.
+- **Accessories Module (Requirement 1):** `AccessoryRepository`, `AccessoryService`.
+- **Promotions Module (Requirement 2):** `PromotionRepository`, `PromotionService`.
+- **Returns Module (Requirement 3):** `ReturnRepository`, `ReturnService` (including monthly balance generation).
+- **Warranties Module (Requirement 4):** `WarrantyRepository`, `WarrantyService`.
+- **Cross-cutting Concerns:** Use of exceptions and validators in services and repositories developed by Developer 2.
 
 ---
 
-## 2. GRASP Patterns Evaluation
+## 2. Evaluation of GRASP Patterns
 
-### 2.1. Information Expert
-* **Verdict:** Correct
-* **Description:** Responsibilities are assigned to the classes that have the necessary information to fulfill them. For instance, `Customer` and `Seller` contain and manage their own specific attributes (`email`, `purchaseHistory`, `employeeCode`, `workShift`) and implement `getDescription()` because they possess the exact data required to build their role-specific description.
+### 1. Creator
 
-### 2.2. Creator
-* **Verdict:** Not Applicable / Correctly Handled Outside
-* **Description:** The creation of specific instances (`Customer` and `Seller`) is delegated to upper layers (such as UI controllers or factories) when user input is captured. The classes within this module do not inappropriately instantiate heavy external dependencies, adhering cleanly to object creation boundaries.
+- **Verdict:** Correct (`correct`)
+- **Evidence:**
+    - `AccessoryRepository.loadAll()`, `PromotionRepository.loadAll()`, and `WarrantyRepository.loadAll(...)` instantiate concrete subclasses (`Controller`, `Cable`, `Memory`, `PercentageDiscount`, `CategoryDiscount`, `BulkPurchaseDiscount`, `BasicWarranty`, `ExtendedWarranty`) based on the type discriminator read from their respective CSV files.
+    - The creation of specific store user instances (`Customer` and `Seller`) is delegated to upper layers when user input is captured, keeping domain classes decoupled from heavy external dependencies.
+- **Explanation:** The repository classes contain the raw data records and the context needed to determine which specialized subclass to construct, aligning correctly with the Creator pattern.
+- **Consequence:** High cohesion in object creation and clear separation between data storage formats and domain logic.
 
-### 2.3. Controller
-* **Verdict:** Not Applicable
-* **Description:** System event handling from the UI interface is delegated to service/handler layers rather than domain models. `PersonService` acts as an intermediary business coordinator, but primary user-interface system event controllers reside in the presentation layer.
+### 2. Information Expert
 
-### 2.4. Low Coupling
-* **Verdict:** Correct
-* **Description:** The module maintains low coupling by clearly separating concerns into distinct packages (`model`, `persistence`, `service`). `PersonService` interacts with persistence exclusively through `PersonFileHandler` and relies on `PersonValidator` for validation, preventing tight coupling between business logic and low-level file I/O operations.
+- **Verdict:** Correct (`correct`)
+- **Evidence:**
+    - `Customer` and `Seller` contain and manage their own specific attributes (`email`, `purchaseHistory`, `employeeCode`, `workShift`) and implement `getDescription()` because they possess the exact data required.
+    - `PromotionService.findBestPromotionFor(Sale sale)` queries active promotions and delegates the calculation logic directly to the promotion instances via `promo.calculateDiscount(sale)`.
+    - `AccessoryService` manages its internal list of accessories and handles search, stock updates, and reductions.
+- **Explanation:** Responsibilities are assigned to the classes that have the necessary state and information to fulfill them (e.g., domain models calculating their specific behaviors).
+- **Consequence:** Encapsulation of domain logic within domain classes, preventing anemic models and making the system easily extensible.
 
-### 2.5. High Cohesion
-* **Verdict:** Correct
-* **Description:** Every class in this module has a single, well-defined responsibility. `Person` handles general identity attributes; `Customer` and `Seller` manage their specific role data; `PersonFileHandler` is solely responsible for serialization and file persistence; and `PersonService` concentrates entirely on business rules and coordination.
+### 3. Low Coupling
 
-### 2.6. Polymorphism
-* **Verdict:** Correct
-* **Description:** Polymorphism is effectively applied through the abstract method `getDescription()` declared in the abstract superclass `Person` and overridden polymorphically in `Customer` and `Seller`. This allows callers to invoke the method on generic `Person` references without knowing the concrete subtype.
+- **Verdict:** Violation (`violation`) / Correct in Persons and Promotions Modules
+- **ID:** `V-ACC-01`
+- **Module:** Returns (Requirement 3) / `ReturnService.java`
+- **Evidence:** In `ReturnService.registerReturn()`, lines checking inventory routing:
 
-### 2.7. Pure Fabrication
-* **Verdict:** Correct
-* **Description:** `PersonFileHandler` is a textbook example of a Pure Fabrication. It introduces a class that does not belong to the problem domain (file reading/writing via Java serialization) to achieve low coupling, high cohesion, and reusability, keeping domain classes pure.
+    ```java
+    if (accessoryService.findById(product.getId()) != null) {
+        accessoryService.restoreStock(product.getId(), 1);
+    } else {
+        productService.updateStock(product.getId(), product.getStock() + 1);
+    }
+    ```
 
-### 2.8. Indirection
-* **Verdict:** Correct
-* **Description:** `PersonService` provides indirection by decoupling the presentation layer from the persistence implementation (`PersonFileHandler`). The UI does not need to know how or where persons are saved or loaded on disk.
+- **Explanation:** While the Persons and Promotions modules maintain low coupling (separating `PersonService` via `PersonFileHandler` and `PromotionService` via its repository), `ReturnService` explicitly needs to know about and manage the separation between `AccessoryService` and `ProductService` to restore inventory, increasing structural coupling.
+- **Consequence:** If a new type of inventory item is introduced later, `ReturnService` must be modified to add another conditional check.
+- **Solution Proposal (Pure Fabrication / Polymorphism):** Introduce a unified inventory management interface or handle stock restoration polymorphically through a common product/item abstraction so services don't need type-checking conditionals.
+- **Other Integrant Code:** No (`false`).
 
-### 2.9. Protected Variations
-* **Verdict:** Protected
-* **Description:** The use of the abstract class `Person` protects the rest of the application from variations in specific types of users. If a new type of person (e.g., `Administrator`) is introduced in the future, existing code handling `Person` references will remain unaffected.
+### 4. High Cohesion
+
+- **Verdict:** Correct (`correct`)
+- **Evidence:**
+    - Every class has a single, well-defined responsibility: `Person` handles identity attributes; `Customer` and `Seller` manage role data; `PersonFileHandler` handles serialization.
+    - Services (`AccessoryService`, `PromotionService`, `ReturnService`, `WarrantyService`) focus strictly on business logic coordination, while repositories (`AccessoryRepository`, `PromotionRepository`, `ReturnRepository`, `WarrantyRepository`) focus solely on file I/O operations and CSV parsing.
+- **Explanation:** Responsibilities are cleanly divided into distinct packages and layers.
+- **Consequence:** Improved maintainability, readability, and ease of unit testing.
+
+### 5. Polymorphism
+
+- **Verdict:** Correct (`correct`)
+- **Evidence:**
+    - The abstract method `getDescription()` declared in `Person` is overridden polymorphically in `Customer` and `Seller`.
+    - `PromotionService` evaluates different discount types (`PercentageDiscount`, `CategoryDiscount`, `BulkPurchaseDiscount`) uniformly through the polymorphic method `calculateDiscount(Sale sale)`.
+- **Explanation:** Behavior varies depending on the type of object without requiring explicit `instanceof` checks or type-switching conditionals.
+- **Consequence:** Respects the Open/Closed Principle (OCP); new types or promotion rules can be added without modifying the coordination services.
+
+### 6. Pure Fabrication
+
+- **Verdict:** Correct (`correct`)
+- **Evidence:** `PersonFileHandler`, `AccessoryRepository`, `PromotionRepository`, `ReturnRepository`, and `WarrantyRepository` act as pure fabrications to handle data persistence to files and CSV storage, keeping this infrastructure responsibility out of domain model classes.
+- **Explanation:** These utility-like classes are introduced to achieve low coupling and high cohesion where domain classes cannot naturally assume storage tasks.
+- **Consequence:** Clean architecture separation and decoupling of business rules from persistence mechanisms.
+
+### 7. Indirection
+
+- **Verdict:** Correct (`correct`)
+- **Evidence:**
+    - `PersonService` provides indirection by decoupling the presentation layer from the persistence implementation (`PersonFileHandler`).
+    - `WarrantyRepository.loadAll(ProductService productService, SaleRepository saleRepository)` uses injected service and repository references to resolve cross-object relationships by ID during CSV loading.
+- **Explanation:** Direct circular dependencies between model objects and repositories are avoided by using intermediate service layers to resolve associations.
+- **Consequence:** Loose coupling between persistent entities and safer object graph reconstruction.
+
+### 8. Protected Variations
+
+- **Verdict:** Protected (`correct`)
+- **Evidence:**
+    - The use of the abstract class `Person` protects the rest of the application from variations in specific types of users.
+    - The `Promotion` hierarchy uses abstract methods and shared interfaces (`isActive`, `calculateDiscount`), protecting `PromotionService` from changes in how individual discount strategies compute their values.
+- **Explanation:** Stable interfaces protect high-level modules from variations in specific subclass implementations.
+- **Consequence:** The system is robust against future modifications in business policies and data structures.
+
+### 9. Controller
+
+- **Verdict:** Not Applicable (`not applicable`)
+- **Evidence:** The classes developed under Developer 2 operate as domain services, models, and persistence handlers, not as entry points for handling raw console or UI events.
+- **Explanation:** Event handling and menu coordination are handled by `ConsoleMenu` and `Main` (Líder Técnico), meaning there is no point of application for the Controller pattern in this specific scope.

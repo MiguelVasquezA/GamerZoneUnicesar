@@ -1,26 +1,26 @@
 # Technical Leader - Individual GRASP Audit Report
 
 ## Audit Scope
-* **Auditor:** Miguel Angel Vasquez Aguirre (Technical Leader)
-* **Audited Classes:**
-  * `com.gamezone.model.Sale`
-  * `com.gamezone.persistence.SaleRepository`
-  * `com.gamezone.service.SaleService`
-  * `com.gamezone.ui.ConsoleMenu`
-  * `com.gamezone.ui.Main`
+* **Auditor:** Technical Leader (Miguel Angel Vasquez Aguirre)
+* **Audited Classes (8 Classes Total):**
+  * **Sales & Domain:** `com.gamezone.model.Sale`, `com.gamezone.model.SaleItem`, `com.gamezone.model.Customer`, `com.gamezone.model.Employee`
+  * **Sales Persistence:** `com.gamezone.persistence.SaleRepository`
+  * **Sales Service:** `com.gamezone.service.SaleService`
+  * **Presentation Layer:** `com.gamezone.ui.ConsoleMenu`
+  * **Application Entry:** `com.gamezone.ui.Main`
 
 ---
 
 ## 1. Information Expert
 * **Verdict:** Violation
 
-### Violation V-01
+### Violation V-LEAD-01
 * **Pattern:** Information Expert
-* **Module:** Sales / Requirement 1 & Requirement 4
-* **Evidence:** `com.gamezone.model.Sale` (constructor lines 43-48 and `calculateTotal()` method lines 67-75).
-* **Explanation:** `Sale` receives precalculated total amounts (`totalAmount`) and discount amounts (`discountAmount`) injected directly into its constructor. Although `Sale` holds the collection of `Product` items, calculating business discounts and net totals is orchestrated outside the domain model inside `SaleService`.
-* **Consequence:** If discount rules change, modifications are forced upon application services instead of encapsulating pricing logic inside the entity holding the sales data.
-* **Proposed Solution:** Refactor `Sale` to compute its own subtotal and net amount, exposing methods like `applyDiscount()` or `calculateFinalTotal()`.
+* **Module:** Sales / Requirement 3
+* **Evidence:** `com.gamezone.model.Sale` (constructor and `calculateTotal()` method)
+* **Explanation:** `Sale` receives precalculated total and discount amounts from external callers during construction instead of taking responsibility for calculating its own net total from its collection of items.
+* **Consequence:** Breaks encapsulation by placing domain pricing logic in external UI or service controllers rather than inside the `Sale` entity that holds the item data.
+* **Proposed Solution:** Delegate total calculation internally to `Sale.calculateTotal()`, summing the subtotals of its `SaleItem` list.
 * **Code from another member:** No
 
 ---
@@ -28,68 +28,76 @@
 ## 2. Creator
 * **Verdict:** Violation
 
-### Violation V-02
+### Violation V-LEAD-02
 * **Pattern:** Creator
-* **Module:** Sales / Requirement 1
-* **Evidence:** `com.gamezone.model.Sale` constructor (line 43) and `setProducts()` (line 143).
-* **Explanation:** `Sale` encapsulates an aggregation of `Product` items. However, the complete `List<Product>` is constructed externally in `ConsoleMenu` / `SaleService` and injected whole, preventing `Sale` from controlling its item aggregation lifecycle.
-* **Consequence:** `Sale` cannot validate or enforce constraints when products are added individually during a sale transaction.
-* **Proposed Solution:** Encapsulate product addition inside `Sale` via an `addProduct(Product product)` method.
-* **Code from another member:** No
+* **Module:** Sales / Requirement 3
+* **Evidence:** `com.gamezone.model.Sale`
+* **Explanation:** Direct lists of `Product` instances created externally are passed into `Sale`. The `Sale` aggregate does not record or create its own `SaleItem` instances when products are added.
+* **Consequence:** Coupling increases because callers must manage individual line items before creating a sale transaction.
+* **Proposed Solution:** Make `Sale` the creator of `SaleItem` instances via an `addItem(Product product, int quantity)` method.
+* **Code from another member:** Yes (Involves `Product` managed by Developer 1)
 
 ---
 
 ## 3. Controller
 * **Verdict:** Violation
 
-### Violation V-03
+### Violation V-LEAD-03
 * **Pattern:** Controller
-* **Module:** View / Requirement 1
-* **Evidence:** `com.gamezone.ui.ConsoleMenu` (lines 80–180).
-* **Explanation:** `ConsoleMenu` acts as a monolithic UI handler that receives user input, validates system entries, prompts for interactive feedback, and directly coordinates workflows for sales, returns, and products instead of delegating system events to specialized application controllers.
-* **Consequence:** High coupling between user interface logic and application orchestration, making it difficult to replace the console menu with a Web or GUI interface.
-* **Proposed Solution:** Refactor `ConsoleMenu` to act purely as a view/presentation component and delegate system actions to domain services or dedicated controller handlers.
-* **Code from another member:** No
+* **Module:** Presentation / Integration
+* **Evidence:** `com.gamezone.ui.ConsoleMenu`
+* **Explanation:** `ConsoleMenu` directly handles console user input loops, formats text outputs, validates input constraints, and orchestrates domain service calls directly.
+* **Consequence:** `ConsoleMenu` becomes a bloated "Bloated Controller" with poor cohesion and low reusability across different UI interfaces.
+* **Proposed Solution:** Separate user interface presentation from system event handling by introducing dedicated UI handlers or application controllers.
+* **Code from another member:** Yes (Involves `ProductService` managed by Developer 1 and `ReturnService` managed by Developer 2)
 
 ---
 
 ## 4. Low Coupling
-* **Verdict:** Correct
-* **Evidence:** `com.gamezone.model.Sale` imports and structural field definitions.
-* **Explanation:** `Sale` depends only on Java standard types (`java.util.List`, `java.io.Serializable`) and the `Product` entity. It maintains no references to persistence or UI layers, keeping its coupling minimal and appropriate for a domain entity.
+* **Verdict:** Violation
+
+### Violation V-LEAD-04
+* **Pattern:** Low Coupling
+* **Module:** Sales & Service Layer
+* **Evidence:** `com.gamezone.service.SaleService` (direct field `private final SaleRepository repository;`)
+* **Explanation:** `SaleService` is directly bound to the concrete file-based persistence class `SaleRepository` instead of depending on an abstraction.
+* **Consequence:** Any change in file storage or migration to a relational database breaks `SaleService`.
+* **Proposed Solution:** Introduce an `ISaleRepository` interface to decouple service logic from storage implementations.
+* **Code from another member:** No
 
 ---
 
 ## 5. High Cohesion
 * **Verdict:** Violation
 
-### Violation V-04
+### Violation V-LEAD-05
 * **Pattern:** High Cohesion
-* **Module:** Sales / Requirement 1
-* **Evidence:** `com.gamezone.model.Sale.generateReceipt()` (line 175).
-* **Explanation:** `Sale` contains formatting logic to construct plain-text receipts with decorative console borders (`=========================================`). This mixes core domain state representation with presentation concerns.
-* **Consequence:** Altering receipt formatting (e.g., printing as PDF or HTML) requires modifying domain entity source code.
-* **Proposed Solution:** Extract formatting logic into a dedicated view formatter or receipt printer class (`ReceiptFormatter`).
+* **Module:** Sales Domain
+* **Evidence:** `com.gamezone.model.Sale.generateReceipt()`
+* **Explanation:** `Sale` contains console-specific text formatting logic for printing receipts alongside its core business state.
+* **Consequence:** Modifying receipt layout or output format forces changes inside the core domain model class.
+* **Proposed Solution:** Extract receipt formatting responsibilities into a dedicated pure fabrication formatter (e.g., `ReceiptPrinter` or `SaleReceiptFormatter`).
 * **Code from another member:** No
 
 ---
 
 ## 6. Polymorphism
-* **Verdict:** Not Applicable
-* **Justification:** The audited sales domain classes do not require handling pluggable behavioral variants or type-based conditional branching in the current system design.
+* **Verdict:** Correct
+* **Evidence:** `com.gamezone.model.Customer` and `com.gamezone.model.Employee` (overriding base behavior from `Person`).
+* **Explanation:** Person sub-types polymorphically override identification and display methods without requiring conditional `instanceof` checks in the service layer.
 
 ---
 
 ## 7. Pure Fabrication
 * **Verdict:** Violation
 
-### Violation V-05
+### Violation V-LEAD-06
 * **Pattern:** Pure Fabrication
-* **Module:** View & Services / Requirement 1
-* **Evidence:** Lack of specialized UI helper fabrications and input parsers in `com.gamezone.ui`.
-* **Explanation:** `ConsoleMenu` directly parses string inputs, manages loop controls, and handles error presentation without utilizing artificial fabrication classes designed to cleanly segregate console parsing from workflow management.
-* **Consequence:** Monolithic UI classes with inflated responsibilities.
-* **Proposed Solution:** Introduce pure fabrications (e.g., `ConsoleInputReader` or `ConsolePrinter`) to handle user input parsing cleanly.
+* **Module:** Presentation & Utility
+* **Evidence:** Lack of UI input parsers and receipt formatters.
+* **Explanation:** Business domain entities and UI classes perform auxiliary utility tasks (such as string formatting and input parsing) directly because no synthetic utility classes exist.
+* **Consequence:** Lowers cohesion across domain and presentation classes.
+* **Proposed Solution:** Fabricate utility classes like `InputConsoleReader` and `ReceiptFormatter`.
 * **Code from another member:** No
 
 ---
@@ -97,13 +105,13 @@
 ## 8. Indirection
 * **Verdict:** Violation
 
-### Violation V-06
-* **Pattern:** Indirection & Low Coupling
-* **Module:** Persistence / Requirement 1
-* **Evidence:** Direct usage of concrete `SaleRepository` inside `SaleService` (lines 20-30) and `com.gamezone.ui.Main`.
-* **Explanation:** `SaleService` depends directly on the concrete file-serialization implementation `SaleRepository` rather than referencing an abstraction or interface.
-* **Consequence:** Replacing the file storage mechanism with a relational database or memory repository forces modifications in `SaleService`.
-* **Proposed Solution:** Introduce an `ISaleRepository` interface to decouple service logic from persistence mechanisms.
+### Violation V-LEAD-07
+* **Pattern:** Indirection
+* **Module:** Sales Persistence
+* **Evidence:** Absence of repository interfaces in `com.gamezone.persistence`.
+* **Explanation:** `SaleService` communicates directly with concrete persistence without an interface mediator.
+* **Consequence:** Limits unit testing capabilities and prevents mocking storage layers.
+* **Proposed Solution:** Introduce `ISaleRepository` as an intermediary abstraction.
 * **Code from another member:** No
 
 ---
@@ -111,11 +119,11 @@
 ## 9. Protected Variations
 * **Verdict:** Violation
 
-### Violation V-07
+### Violation V-LEAD-08
 * **Pattern:** Protected Variations
-* **Module:** Sales / Requirement 1
-* **Evidence:** `private List<Product> products;` in `com.gamezone.model.Sale` (line 23).
-* **Explanation:** `Sale` references `Product` directly in a list. It lacks an intermediary value object representing a line item (quantity, historical price locked at the time of purchase).
-* **Consequence:** Future changes to product unit prices corrupt historical sale records, and item quantities per sale line cannot be tracked cleanly.
-* **Proposed Solution:** Encapsulate sold items using a `SaleItem` line item wrapper to protect `Sale` against product attribute variations over time.
-* **Code from another member:** No
+* **Module:** Sales & Products
+* **Evidence:** `com.gamezone.model.Sale` referencing `List<Product>` directly without price snapshots.
+* **Explanation:** `Sale` holds direct references to `Product`. If a product's price is modified in the catalog, historical sales records change retroactively.
+* **Consequence:** Historical transaction totals and audit reports become inconsistent over time.
+* **Proposed Solution:** Encapsulate historical transaction data using `SaleItem` to lock in unit prices at the moment of sale.
+* **Code from another member:** Yes (Involves `Product` managed by Developer 1)

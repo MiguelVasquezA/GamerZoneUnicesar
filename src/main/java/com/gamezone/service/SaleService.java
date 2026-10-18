@@ -1,105 +1,39 @@
 package com.gamezone.service;
 
-import com.gamezone.exceptions.BusinessRuleException;
-import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
-import com.gamezone.persistence.SaleRepository;
-import com.gamezone.validation.SaleValidator;
-
-import java.time.LocalDate;
+import com.gamezone.model.SaleItem;
+import com.gamezone.persistence.IProductRepository;
+import com.gamezone.persistence.ISaleRepository;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
 /**
- * Service responsible for managing sales transactions, inventory reduction,
- * and warranty assignments during sale registration.
- *
- * @author Desarrolladora 2
- * @version 1.9
+ * Service managing sales business transactions.
+ * Interacts with persistence through repository abstractions.
  */
 public class SaleService {
+    private final ISaleRepository saleRepository;
+    private final IProductRepository productRepository;
 
-    private final SaleRepository saleRepository;
-    private final ProductService productService;
-    private final AccessoryService accessoryService;
-    private final WarrantyService warrantyService;
-    private final PersonService personService; // Añadido para buscar el cliente y vendedor si es necesario
-
-    /**
-     * Constructs a SaleService with its required repository and service dependencies.
-     */
-    public SaleService(SaleRepository saleRepository, ProductService productService, AccessoryService accessoryService, WarrantyService warrantyService, PersonService personService) {
+    public SaleService(ISaleRepository saleRepository, IProductRepository productRepository) {
         this.saleRepository = saleRepository;
-        this.productService = productService;
-        this.accessoryService = accessoryService;
-        this.warrantyService = warrantyService;
-        this.personService = personService;
+        this.productRepository = productRepository;
     }
 
-    /**
-     * Retrieves all registered sales.
-     *
-     * @return a list of all sales
-     */
-    public List<Sale> listAllSales() {
-        return saleRepository.loadSales();
+    public void registerSale(Sale sale) {
+        if (sale == null) {
+            throw new IllegalArgumentException("Sale cannot be null.");
+        }
+        // Information Expert: Sale calculates its total internally
+        sale.calculateTotal();
+        saleRepository.save(sale);
     }
 
-    /**
-     * Registers a new sale, updates product/accessory stock, and assigns warranties.
-     */
-    public Sale registerSale(String clientId, String sellerId, List<Product> products, double discountAmount, boolean hasExtendedWarranty) {
-        // Validar que el cliente y el vendedor existan a través del personService
-        Object customer = personService.searchPerson(clientId);
-        Object seller = personService.searchPerson(sellerId);
+    public List<Sale> getAllSales() {
+        return saleRepository.findAll();
+    }
 
-        // Delegar validación a SaleValidator con los 3 parámetros requeridos
-        SaleValidator.validateSaleData(customer, seller, products);
-
-        // 1. Update inventory stock for each purchased item
-        for (Product p : products) {
-            if (accessoryService.findById(p.getId()) != null) {
-                accessoryService.reduceStock(p.getId(), 1);
-            } else {
-                productService.reduceStock(p.getId(), 1);
-            }
-        }
-
-        // 2. Generate unique sale ID and calculate financial amounts
-        String saleId = "SALE-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-        double subtotal = products.stream().mapToDouble(Product::getPrice).sum();
-
-        if (discountAmount > subtotal) {
-            throw new BusinessRuleException("Discount amount cannot exceed the subtotal of the sale.");
-        }
-
-        double totalAmount = subtotal - discountAmount;
-
-        // 3. Build Sale instance
-        Sale sale = new Sale(
-                saleId,
-                clientId,
-                products,
-                totalAmount,
-                discountAmount,
-                LocalDate.now().toString(),
-                sellerId
-        );
-
-        // 4. Assign warranties for each product in the sale
-        for (Product item : products) {
-            if (hasExtendedWarranty) {
-                warrantyService.assignExtendedWarranty(item, sale, LocalDate.now());
-            } else {
-                warrantyService.assignBasicWarranty(item, sale, LocalDate.now());
-            }
-        }
-
-        // 5. Persist the sale
-        List<Sale> sales = saleRepository.loadSales();
-        sales.add(sale);
-        saleRepository.saveSale(sales);
-
-        return sale;
+    public Optional<Sale> getSaleById(String saleId) {
+        return saleRepository.findById(saleId);
     }
 }

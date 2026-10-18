@@ -5,14 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b2a290e6-17a6-47a1-bb58-49dde763d35d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IA-Usage/developer1-ia-log.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IA-Usage/developer2-ia-log.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/IA-Usage/leader-ia-log.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/accessories.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/grasp-audit/developer2-audit.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/grasp-audit/developer2-audit.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/gamezone/model/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/gamezone/model/Product.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/gamezone/persistence/SaleRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/gamezone/persistence/SaleRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/gamezone/service/SaleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/gamezone/service/SaleService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/gamezone/ui/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/gamezone/ui/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,12 +19,16 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "git-widget-placeholder": "feature/grasp-audit-dev2",
+    "git-widget-placeholder": "feature/grasp-refactoring-dev1",
     "node.js.selected.package.tslint": "(autodetect)"
   }
 }]]></component>

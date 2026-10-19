@@ -1,59 +1,72 @@
 package com.gamezone.model;
 
-/**
- * Represents a generic product in the GameZone store.
- * This is an abstract base class containing common attributes and behaviors
- * for all commercialized products.
- *
- * @author FC Evento
- * @version 1.0
- */
+import java.io.Serializable;
 
-public abstract class Product {
+/**
+ * Base abstract class for all product items.
+ * Implements Information Expert and Polymorphism GRASP patterns.
+ */
+public abstract class Product implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String id;
     private String title;
     private double price;
     private int stock;
 
-    /**
-     * Constructs a Product.
-     * @param id product id
-     * @param title product title
-     * @param price unit price
-     * @param stock inventory quantity
-     */
-
-    public Product(String id, double price, int stock, String title) {
+    public Product(String id, String title, double price, int stock) {
         this.id = id;
+        this.title = title;
         this.price = price;
         this.stock = stock;
-        this.title = title;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public int getStock() {
-        return stock;
-    }
-
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
-    public String getTitle() {
-        return title;
     }
 
     /**
-     * Returns the complete description of the product.
-     * @return formatted description string
+     * Information Expert Pattern (Fix V-DEV1-01):
+     * Product manages and mutates its own stock state safely.
+     *
+     * @param quantity amount of stock to reduce
      */
+    public void reduceStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity to reduce must be greater than zero.");
+        }
+        if (quantity > this.stock) {
+            throw new IllegalStateException("Insufficient stock available for product: " + this.title);
+        }
+        this.stock -= quantity;
+    }
 
-    public abstract String getDescription();
+    /**
+     * Information Expert Pattern: Restores product inventory.
+     *
+     * @param quantity amount to restore
+     */
+    public void restoreStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity to restore must be greater than zero.");
+        }
+        this.stock += quantity;
+    }
+
+    /**
+     * Polymorphism Pattern (Fix V-DEV1-05):
+     * Abstract method implemented by concrete subclasses to format CSV records without instanceof checks.
+     *
+     * @return CSV formatted string line
+     */
+    public abstract String toCsvRecord();
+
+    // Getters and Setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
 }

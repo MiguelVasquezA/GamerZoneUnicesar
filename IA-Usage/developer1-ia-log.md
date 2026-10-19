@@ -199,3 +199,437 @@ This document logs the use of AI assistance during the development of the Produc
 **AI Assistance Received:** Confirmed that `Return` and `Sale` only hold domain state and internal calculations, keeping CSV file operations strictly inside `ReturnRepository` and user prompts inside `ConsoleMenu`.
 
 **Applied Outcome:** Finalized Developer 1 code boundaries before opening the Pull Request.
+
+---
+
+### Entry 15: GRASP Audit Scope & Class Hierarchy Mapping
+
+**Date:** 2026-10-18
+
+**Topic:** Phase 1 GRASP Audit scope for Product and Accessory modules
+
+**Prompt Summary:** Asked for assistance structuring the audit scope table for `developer1-audit.md` covering all assigned domain classes (`Product`, `VideoGame`, `Console`, `Accessory`, `Controller`, `Cable`, `Memory`, `Promotion`), persistence (`ProductRepository`), and service (`ProductService`).
+
+**AI Assistance Received:** Guided the organization of classes by requirement and responsibility tier, ensuring 100% of the assigned codebase was cataloged for GRASP evaluation without missing sub-packages or domain models.
+
+**Applied Outcome:** Documented the scope section in `docs/grasp-audit/developer1-audit.md`.
+
+---
+
+### Entry 16: GRASP Information Expert Analysis on Product Entity
+
+**Date:** 2026-10-18
+
+**Topic:** Stock mutation responsibility assignment
+
+**Prompt Summary:** Consulted on whether `ProductService` directly modifying `stock` attributes violates Information Expert.
+
+**AI Assistance Received:** Confirmed that `Product` owns the `stock` state and holds the information needed to validate and update it. Recommended encapsulating `reduceStock(int quantity)` and `increaseStock(int quantity)` directly within `Product.java`.
+
+**Applied Outcome:** Recorded violation V-05 in `developer1-audit.md` and prepared method signatures for domain encapsulation.
+
+---
+
+### Entry 17: GRASP Polymorphism Audit on Product Serialization
+
+**Date:** 2026-10-18
+
+**Topic:** Replacement of type conditional checks with polymorphic behavior
+
+**Prompt Summary:** Asked how using `instanceof` inside `ProductRepository` to serialize subclasses (`VideoGame`, `Console`, `Accessory`) violates GRASP Polymorphism.
+
+**AI Assistance Received:** Explained that handling variant type formatting using `instanceof` blocks increases coupling and violates Polymorphism. Advised declaring an abstract `toCsvRecord()` method in `Product.java` and implementing custom serialization in each subclass.
+
+**Applied Outcome:** Identified violation V-06 in `developer1-audit.md` and defined the polymorphic strategy.
+
+---
+
+### Entry 18: GRASP Low Coupling & Indirection in Product Persistence
+
+**Date:** 2026-10-18
+
+**Topic:** Decoupling ProductService from concrete file storage
+
+**Prompt Summary:** Consulted on how `ProductService` directly instantiating `ProductRepository` creates tight coupling to file storage.
+
+**AI Assistance Received:** Advised introducing an `IProductRepository` interface as an indirection layer, enabling constructor dependency injection in `ProductService` and isolating business logic from I/O mechanisms.
+
+**Applied Outcome:** Documented violation V-07 in `developer1-audit.md` and designed `IProductRepository`.
+
+---
+
+### Entry 19: GRASP Information Expert in Promotion Strategy Subclasses
+
+**Date:** 2026-10-18
+
+**Topic:** Discount calculation responsibility in Promotions domain
+
+**Prompt Summary:** Consulted on whether computing promotional discount percentages inside services rather than promotion objects violates Information Expert.
+
+**AI Assistance Received:** Clarified that concrete `Promotion` subclasses hold discount parameters and rules, so discount application (`applyDiscount(double price)`) belongs inside `Promotion` classes.
+
+**Applied Outcome:** Logged violation V-08 in `developer1-audit.md` for the Promotions module.
+
+---
+
+### Entry 20: Border Findings Alignment with Presentation Layer
+
+**Date:** 2026-10-18
+
+**Topic:** Cross-developer boundary audit between ConsoleMenu and ProductService
+
+**Prompt Summary:** Consulted on how to handle audit findings where Technical Leader's `ConsoleMenu` directly invoked concrete methods in `ProductService`.
+
+**AI Assistance Received:** Recommended classifying this as a joint boundary finding: Technical Leader refactors `ConsoleMenu` to interact with interface contracts, while Developer 1 exposes clean service interface methods.
+
+**Applied Outcome:** Collaborated with Technical Leader to record boundary resolution in Section 5 of `consolidated-audit.md`.
+
+---
+
+### Entry 21: Out-of-Scope Defect Segregation (Negative Stock Handling)
+
+**Date:** 2026-10-18
+
+**Topic:** Non-regression rules and functional bug classification
+
+**Prompt Summary:** Asked whether adding new console validation rules to prevent negative stock input during product registration should be fixed during GRASP refactoring.
+
+**AI Assistance Received:** Clarified that altering console input/output behavior breaks the non-regression constraint of Requirement 7. Advised logging the issue as an out-of-scope functional defect in Section 6 of `consolidated-audit.md`.
+
+**Applied Outcome:** Segregated functional input validation findings without altering user-observed behavior.
+
+---
+
+### Entry 22: Individual GRASP Audit Report Completion
+
+**Date:** 2026-10-18
+
+**Topic:** Final review of `developer1-audit.md` against rubric standards
+
+**Prompt Summary:** Requested an audit review of `developer1-audit.md` to ensure all 9 GRASP patterns received explicit verdicts (Violation, Correct, Not Applicable) with code evidence.
+
+**AI Assistance Received:** Verified that all 9 patterns contained concrete line references, explanations, consequences, and proposed solutions.
+
+**Applied Outcome:** Committed `docs/grasp-audit/developer1-audit.md` and submitted it for team consolidation.
+
+---
+
+### Entry 23: Consolidated Audit Matrix Integration
+
+**Date:** 2026-10-18
+
+**Topic:** Unifying individual audit findings into `consolidated-audit.md`
+
+**Prompt Summary:** Consulted on mapping Developer 1 violations (V-05 through V-08) into the team's consolidated audit matrix alongside Technical Leader and Developer 2 findings.
+
+**AI Assistance Received:** Provided Markdown table structure linking each violation ID to its pattern, location, proposed refactoring, source report, and assigned developer.
+
+**Applied Outcome:** Integrated Product module findings into `docs/grasp-audit/consolidated-audit.md`.
+
+---
+
+### Entry 24: Design Analysis Question 1: Verdict Criteria
+
+**Date:** 2026-10-18
+
+**Topic:** Documenting team design analysis criteria in `docs/grasp-analysis.md`
+
+**Prompt Summary:** Consulted on defining objective criteria used to classify code fragments as violations, correct applications, or not applicable.
+
+**AI Assistance Received:** Formulated technical guidelines emphasizing code evidence, structural coupling metrics, and encapsulation principles for English documentation.
+
+**Applied Outcome:** Contributed Product module rationale to Question 1 in `docs/grasp-analysis.md`.
+
+---
+
+### Entry 25: Design Analysis Question 3: Multi-Pattern Violations
+
+**Date:** 2026-10-18
+
+**Topic:** Handling code overlapping Low Coupling and Indirection
+
+**Prompt Summary:** Asked how to document code fragments that violate both Low Coupling and Indirection (e.g., direct service-to-repository instantiation) without duplicating findings.
+
+**AI Assistance Received:** Explained that Indirection serves as the primary structural solution to achieve Low Coupling, so the core violation is cataloged under Low Coupling while citing Indirection as the mechanism for resolution.
+
+**Applied Outcome:** Documented multi-pattern analysis in `docs/grasp-analysis.md`.
+
+---
+
+### Entry 26: Design Analysis Question 5: Refactoring Execution Order
+
+**Date:** 2026-10-18
+
+**Topic:** Bottom-up refactoring sequence for Product module
+
+**Prompt Summary:** Requested guidance on ordering refactoring steps to avoid breaking dependencies in other team members' modules during Phase 2.
+
+**AI Assistance Received:** Recommended refactoring domain entities first (`Product` stock methods), followed by persistence interfaces (`IProductRepository`), then service injection (`ProductService`), and finally UI integrations.
+
+**Applied Outcome:** Established execution timeline for Phase 2 refactoring in `feature/grasp-refactoring-dev1`.
+
+---
+
+### Entry 27: Phase 2 Branch Setup & Workspace Verification
+
+**Date:** 2026-10-18
+
+**Topic:** Git branch creation for Phase 2 refactoring
+
+**Prompt Summary:** Requested step-by-step terminal commands to branch off updated `develop` and start Phase 2 refactoring cleanly.
+
+**AI Assistance Received:** Guided execution of `git fetch origin`, `git checkout develop`, and `git checkout -b feature/grasp-refactoring-dev1`.
+
+**Applied Outcome:** Created and isolated workspace on `feature/grasp-refactoring-dev1`.
+
+---
+
+### Entry 28: Encapsulating Stock Logic in Product Domain
+
+**Date:** 2026-10-18
+
+**Topic:** Refactoring `Product.java` for Information Expert compliance
+
+**Prompt Summary:** Requested code review for adding defensive stock reduction and replenishment methods inside `Product.java`.
+
+**AI Assistance Received:** Reviewed implementation of `reduceStock(int qty)` with custom exception throwing if quantity exceeds current stock, ensuring domain invariants are preserved within the model.
+
+**Applied Outcome:** Implemented encapsulated stock mutation methods in `Product.java` and concrete subclasses.
+
+---
+
+### Entry 29: Extracting Abstract `toCsvRecord()` Method
+
+**Date:** 2026-10-18
+
+**Topic:** Polymorphic CSV serialization refactoring
+
+**Prompt Summary:** Consulted on converting `ProductRepository` conditional CSV string building into polymorphic method calls.
+
+**AI Assistance Received:** Guided declaring `public abstract String toCsvRecord()` in `Product.java` and implementing custom CSV formatting inside `VideoGame`, `Console`, and `Accessory`.
+
+**Applied Outcome:** Eliminated `instanceof` checks in `ProductRepository` in favor of polymorphic invocation.
+
+---
+
+### Entry 30: Extracting `IProductRepository` Interface
+
+**Date:** 2026-10-18
+
+**Topic:** Applying Indirection pattern to persistence layer
+
+**Prompt Summary:** Requested code review for extracting `IProductRepository` interface and binding `ProductRepository` to it.
+
+**AI Assistance Received:** Verified interface declaration with standard CRUD signatures (`save`, `findById`, `findAll`, `update`) and ensured `ProductRepository implements IProductRepository`.
+
+**Applied Outcome:** Created `com.gamezone.persistence.IProductRepository` interface.
+
+---
+
+### Entry 31: Constructor Dependency Injection in `ProductService`
+
+**Date:** 2026-10-18
+
+**Topic:** Refactoring service constructors for Low Coupling
+
+**Prompt Summary:** Asked how to update `ProductService` to receive `IProductRepository` via constructor injection instead of using `new ProductRepository()`.
+
+**AI Assistance Received:** Demonstrated constructor injection pattern, allowing `ProductService` to depend strictly on the interface abstraction.
+
+**Applied Outcome:** Refactored `ProductService.java` to accept `IProductRepository` in constructor.
+
+---
+
+### Entry 32: Refactoring Promotions Domain Strategy Pattern
+
+**Date:** 2026-10-18
+
+**Topic:** Information Expert refactoring in `Promotion` hierarchy
+
+**Prompt Summary:** Requested assistance moving discount calculation logic into concrete `Promotion` subclasses.
+
+**AI Assistance Received:** Guided implementation of `applyDiscount(double basePrice)` across promotional strategies, ensuring price calculation stays within promotion models.
+
+**Applied Outcome:** Updated `Promotion.java` and its concrete subclasses with encapsulated calculation logic.
+
+---
+
+### Entry 33: Class Diagram "Before Refactoring" Modeling (Mermaid)
+
+**Date:** 2026-10-18
+
+**Topic:** Generating Mermaid class diagram for initial Product codebase
+
+**Prompt Summary:** Asked for assistance formatting Mermaid syntax for Product module classes prior to GRASP refactoring, highlighting violation nodes.
+
+**AI Assistance Received:** Provided Mermaid `classDiagram` code depicting direct concrete dependencies and attaching note annotations for violations V-05, V-06, V-07, and V-08.
+
+**Applied Outcome:** Added Product module section to "Before" diagram in `docs/grasp-class-diagram.md`.
+
+---
+
+### Entry 34: Class Diagram "After Refactoring" Modeling (Mermaid)
+
+**Date:** 2026-10-18
+
+**Topic:** Visualizing refactored architecture in Mermaid syntax
+
+**Prompt Summary:** Requested Mermaid syntax for the refactored Product architecture showing `IProductRepository` interface abstractions and polymorphic methods.
+
+**AI Assistance Received:** Formatted updated Mermaid diagram displaying interface realization (`..|>`) and constructor injection dependencies (`..>`).
+
+**Applied Outcome:** Added Product module section to "After" diagram in `docs/grasp-class-diagram.md`.
+
+---
+
+### Entry 35: Resolving `.idea` and IDE Config Git Tracking Conflicts
+
+**Date:** 2026-10-18
+
+**Topic:** Git index cleanup for untracked workspace configuration
+
+**Prompt Summary:** Asked how to handle git errors when `git pull` reports untracked working tree files (`.idea/workspace.xml`) being overwritten.
+
+**AI Assistance Received:** Instructed running `git rm -r --cached .idea` and updating `.gitignore` to prevent IDE metadata from clogging branch synchronization across team members.
+
+**Applied Outcome:** Removed `.idea/` from Git tracking and cleaned local workspace.
+
+---
+
+### Entry 36: Resolving `modify/delete` Conflicts on Shared Files
+
+**Date:** 2026-10-18
+
+**Topic:** Resolving merge conflicts during branch sync with `develop`
+
+**Prompt Summary:** Requested assistance resolving a `CONFLIT (modify/delete)` error on `.idea/workspace.xml` when pulling from `origin/develop`.
+
+**AI Assistance Received:** Advised executing `git rm .idea/workspace.xml` to accept the deletion, followed by `git commit` to complete the merge cleanly.
+
+**Applied Outcome:** Cleared merge conflict and normalized local branch state.
+
+---
+
+### Entry 37: Synchronizing Shared `IA-Usage` Folder across Feature Branches
+
+**Date:** 2026-10-18
+
+**Topic:** Selective folder checkout from remote `develop` branch
+
+**Prompt Summary:** Asked for commands to bring the newly created `IA-Usage` directory into `feature/grasp-refactoring-dev1` without doing a full merge.
+
+**AI Assistance Received:** Provided commands: `git fetch origin` followed by `git checkout origin/develop -- IA-Usage`, explaining how it pulls specific directories safely.
+
+**Applied Outcome:** Integrated `IA-Usage` folder into local feature branch.
+
+---
+
+### Entry 38: Line Ending Warning Interpretation (`LF will be replaced by CRLF`)
+
+**Date:** 2026-10-18
+
+**Topic:** Git cross-platform line ending warnings in Windows PowerShell
+
+**Prompt Summary:** Asked if `warning: in the working copy of ..., LF will be replaced by CRLF` during `git add .` impacts code or breaks execution.
+
+**AI Assistance Received:** Explained that the warning is harmless information regarding line feed conversion between Unix (LF) and Windows (CRLF) environments.
+
+**Applied Outcome:** Continued commit and push operations without issue.
+
+---
+
+### Entry 39: Non-Regression Verification for Product Registration
+
+**Date:** 2026-10-18
+
+**Topic:** Manual testing of VideoGame and Console registration flows
+
+**Prompt Summary:** Consulted on testing protocol to confirm refactored `ProductService` and `ProductRepository` produce identical file outputs and console displays.
+
+**AI Assistance Received:** Recommended executing `Main.java`, registering sample VideoGames and Consoles, and verifying that `product.txt` formatting and menu outputs remain 100% identical.
+
+**Applied Outcome:** Verified zero regression in product registration and CSV storage.
+
+---
+
+### Entry 40: Non-Regression Verification for Stock Updates & Sales Flow
+
+**Date:** 2026-10-18
+
+**Topic:** Verifying cross-module interaction with Technical Leader's Sales module
+
+**Prompt Summary:** Asked how to test that encapsulated `reduceStock()` in `Product` works seamlessly when called during sale transactions in `SaleService`.
+
+**AI Assistance Received:** Advised running a complete sale simulation from console menu, checking that stock is decremented accurately without throwing unexpected runtime exceptions.
+
+**Applied Outcome:** Confirmed smooth cross-module integration with Sales service.
+
+---
+
+### Entry 41: Formatting Changelog Traceability Matrix Entries
+
+**Date:** 2026-10-18
+
+**Topic:** Documenting commit hashes and PR links in `docs/changelog.md`
+
+**Prompt Summary:** Requested assistance structuring the traceability matrix linking Product violations (V-05 to V-08) to their corresponding commits and Pull Request #39.
+
+**AI Assistance Received:** Provided Markdown table layout linking Violation ID, GRASP Pattern, Commit Hash, PR link, and Responsible Developer.
+
+**Applied Outcome:** Updated Product module entries in `docs/changelog.md`.
+
+---
+
+### Entry 42: Atomic Commit Formatting for Product Refactoring
+
+**Date:** 2026-10-18
+
+**Topic:** Conventional Commits formatting for Phase 2 push
+
+**Prompt Summary:** Asked for proper Conventional Commit messages for committing refactored Product persistence and domain classes.
+
+**AI Assistance Received:** Suggested messages: `refactor(domain): encapsulate stock logic in Product entity` and `refactor(persistence): bind ProductService to IProductRepository interface`.
+
+**Applied Outcome:** Committed all Phase 2 changes using standardized commit messages.
+
+---
+
+### Entry 43: Pull Request #39 Creation and Verification
+
+**Date:** 2026-10-18
+
+**Topic:** Merging `feature/grasp-refactoring-dev1` into `develop`
+
+**Prompt Summary:** Consulted on opening Pull Request #39 on GitHub and verifying automated merge checks before merging into `develop`.
+
+**AI Assistance Received:** Guided PR description formatting, listing resolved violations (V-05, V-06, V-07, V-08) and confirming zero merge conflicts.
+
+**Applied Outcome:** Opened and successfully merged PR #39 into `develop`.
+
+---
+
+### Entry 44: Synchronizing Local `develop` Post-PR Merge
+
+**Date:** 2026-10-18
+
+**Topic:** Post-merge local repository synchronization
+
+**Prompt Summary:** Asked for commands to update local `develop` branch after merging PR #39 on GitHub.
+
+**AI Assistance Received:** Provided commands: `git checkout develop`, `git fetch origin`, and `git pull origin develop`.
+
+**Applied Outcome:** Aligned local `develop` branch with remote HEAD.
+
+---
+
+### Entry 45: Verifying Cross-Developer Interfaces (Developer 2 Integration)
+
+**Date:** 2026-10-18
+
+**Topic:** Interface integration with Person, Return, and Warranty modules
+
+**Prompt Summary:** Consulted on testing compatibility between refactored `ProductService` and Developer 2's return processing logic.
+
+**AI Assistance Received:** Advised verifying that `IProductRepository` and `ProductService` method signatures match expectations in `ReturnService` for stock restoration.
+
+**Applied Outcome:** Confirmed cross-developer interface compatibility with

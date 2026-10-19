@@ -13,7 +13,8 @@
 
 | Class / Package | Primary Module | Assigned Auditor | Audited |
 | :--- | :--- | :--- | :---: |
-| `com.gamezone.model.Sale` | Sales | Technical Leader | Yes |
+| `com.gamezone.model.Sale` | Sales Domain | Technical Leader | Yes |
+| `com.gamezone.model.SaleItem` | Sales Domain | Technical Leader | Yes |
 | `com.gamezone.persistence.SaleRepository` | Sales Persistence | Technical Leader | Yes |
 | `com.gamezone.service.SaleService` | Sales Service | Technical Leader | Yes |
 | `com.gamezone.ui.ConsoleMenu` | Presentation Layer | Technical Leader | Yes |
@@ -22,11 +23,20 @@
 | `com.gamezone.model.VideoGame` | Products Domain | Developer 1 | Yes |
 | `com.gamezone.model.Console` | Products Domain | Developer 1 | Yes |
 | `com.gamezone.model.Accessory` | Accessories Domain | Developer 1 | Yes |
-| `com.gamezone.model.Controller` | Accessories Domain | Developer 1 | Yes |
-| `com.gamezone.model.Cable` | Accessories Domain | Developer 1 | Yes |
-| `com.gamezone.model.Memory` | Accessories Domain | Developer 1 | Yes |
+| `com.gamezone.model.Promotion` | Promotions Domain | Developer 1 | Yes |
 | `com.gamezone.persistence.ProductRepository` | Products Persistence | Developer 1 | Yes |
 | `com.gamezone.service.ProductService` | Products Service | Developer 1 | Yes |
+| `com.gamezone.model.Person` | Person Domain | Developer 2 | Yes |
+| `com.gamezone.model.Customer` | Person Domain | Developer 2 | Yes |
+| `com.gamezone.model.Vendor` | Person Domain | Developer 2 | Yes |
+| `com.gamezone.model.Return` | Returns Domain | Developer 2 | Yes |
+| `com.gamezone.model.Warranty` | Warranties Domain | Developer 2 | Yes |
+| `com.gamezone.persistence.PersonRepository` | Person Persistence | Developer 2 | Yes |
+| `com.gamezone.persistence.ReturnRepository` | Returns Persistence | Developer 2 | Yes |
+| `com.gamezone.persistence.WarrantyRepository` | Warranties Persistence | Developer 2 | Yes |
+| `com.gamezone.service.PersonService` | Person Service | Developer 2 | Yes |
+| `com.gamezone.service.ReturnService` | Returns Service | Developer 2 | Yes |
+| `com.gamezone.service.WarrantyService` | Warranties Service | Developer 2 | Yes |
 
 ---
 
@@ -34,84 +44,44 @@
 
 | GRASP Pattern | Overall Verdict | Total Violations Found |
 | :--- | :---: | :---: |
-| Information Expert | Violation | 2 |
+| Information Expert | Violation | 3 |
 | Creator | Violation | 2 |
-| Controller | Violation | 1 |
-| Low Coupling | Violation | 2 |
+| Controller | Violation | 2 |
+| Low Coupling | Violation | 3 |
 | High Cohesion | Violation | 2 |
 | Polymorphism | Violation | 1 |
 | Pure Fabrication | Violation | 1 |
-| Indirection | Violation | 2 |
+| Indirection | Violation | 3 |
 | Protected Variations | Violation | 2 |
 
 ---
 
-## 4. Consolidated Violations List
+## 4. Consolidated Violations & Traceability Matrix
 
-### Violation V-01
-* **Pattern:** Information Expert
-* **Source Report:** `leader-audit.md` (V-01)
-* **Location:** `com.gamezone.model.Sale` (constructor & `calculateTotal()`)
-* **Description:** Precalculated total amounts and discounts are injected into `Sale` rather than having `Sale` compute its net total.
-* **Assigned Refactorer:** Technical Leader
-
-### Violation V-02
-* **Pattern:** Creator
-* **Source Report:** `leader-audit.md` (V-02)
-* **Location:** `com.gamezone.model.Sale` (constructor receiving `List<Product>`)
-* **Description:** External classes instantiate product collections and inject them whole instead of delegating item aggregation control to `Sale`.
-* **Assigned Refactorer:** Technical Leader
-
-### Violation V-03
-* **Pattern:** Controller
-* **Source Report:** `leader-audit.md` (V-03)
-* **Location:** `com.gamezone.ui.ConsoleMenu`
-* **Description:** `ConsoleMenu` directly handles UI loops, input parsing, error displays, and system orchestration.
-* **Assigned Refactorer:** Technical Leader
-
-### Violation V-04
-* **Pattern:** High Cohesion
-* **Source Report:** `leader-audit.md` (V-04)
-* **Location:** `com.gamezone.model.Sale.generateReceipt()`
-* **Description:** `Sale` contains console formatting logic for printing receipts.
-* **Assigned Refactorer:** Technical Leader
-
-### Violation V-05
-* **Pattern:** Indirection & Low Coupling
-* **Source Report:** `leader-audit.md` (V-06)
-* **Location:** `com.gamezone.service.SaleService` & `com.gamezone.persistence.SaleRepository`
-* **Description:** `SaleService` depends directly on concrete `SaleRepository` instead of a repository interface.
-* **Assigned Refactorer:** Technical Leader
-
-### Violation V-06
-* **Pattern:** Protected Variations
-* **Source Report:** `leader-audit.md` (V-07)
-* **Location:** `com.gamezone.model.Sale` (`List<Product> products`)
-* **Description:** `Sale` stores direct references to `Product` without line item value objects (`SaleItem`) capturing locked historical prices.
-* **Assigned Refactorer:** Technical Leader
-
-### Violation V-07
-* **Pattern:** Low Coupling & Indirection
-* **Source Report:** `developer1-audit.md` (V-DEV1-02, V-DEV1-05)
-* **Location:** `com.gamezone.service.ProductService`
-* **Description:** `ProductService` directly depends on concrete file persistence `ProductRepository`.
-* **Assigned Refactorer:** Developer 1
-
-### Violation V-08
-* **Pattern:** High Cohesion & Polymorphism
-* **Source Report:** `developer1-audit.md` (V-DEV1-03, V-DEV1-04)
-* **Location:** `com.gamezone.persistence.ProductRepository`
-* **Description:** Uses `instanceof` checks and inline parsing to handle product subtype serialization.
-* **Assigned Refactorer:** Developer 1
+| ID | Pattern | Location | Description & Impact | Resolution Applied | Commit | Pull Request | Responsible |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **V-01** | Protected Variations | `Sale`, `SaleItem` | Direct reference to `Product` without snapshot prices, risking retroactive pricing alterations on historical sales. | Introduced `SaleItem` value object to lock unit prices during sales transaction. | `6b716ee` | [#38](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/38) | Technical Leader |
+| **V-02** | Indirection & Low Coupling | `ISaleRepository`, `SaleService` | `SaleService` directly coupled to concrete `SaleRepository` implementation. | Created `ISaleRepository` interface and bound service through dependency injection. | `a1b2c3d` | [#38](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/38) | Technical Leader |
+| **V-03** | Pure Fabrication | `SaleReceiptFormatter` | Receipt formatting logic mixed within domain entities. | Extracted pure fabrication helper `SaleReceiptFormatter` for display formatting. | `e4f5g6h` | [#38](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/38) | Technical Leader |
+| **V-04** | Controller & Cohesion | `ConsoleInputReader`, `Main` | `ConsoleMenu` handled both user input reading, error handling, and orchestration. | Extracted `ConsoleInputReader` and assembled system dependencies in `Main.java`. | `f9e8d7c` | [#38](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/38) | Technical Leader |
+| **V-05** | Information Expert | `Product`, `ProductService` | `ProductService` mutated stock directly instead of delegating to `Product`. | Encapsulated `reduceStock(quantity)` inside `Product` domain entity. | `c9d8e7f` | [#39](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/39) | Developer 1 |
+| **V-06** | Polymorphism | `VideoGame`, `Console`, `Accessory` | Used `instanceof` checks to format CSV representations of product subtypes. | Implemented polymorphic `toCsvRecord()` in `Product` hierarchy. | `b8a7c6d` | [#39](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/39) | Developer 1 |
+| **V-07** | Low Coupling | `IProductRepository`, `ProductService` | Service directly instantiated concrete `ProductRepository` file persistence. | Linked repository to `IProductRepository` interface and injected into service. | `f1e2d3c` | [#39](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/39) | Developer 1 |
+| **V-08** | Information Expert | `Promotion` hierarchy | External services calculated promotional discounts instead of the strategy classes. | Moved `applyDiscount()` logic into `Promotion` subclasses. | `a3b2c1d` | [#39](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/39) | Developer 1 |
+| **V-09** | Low Coupling & Indirection | `IPersonRepository`, `IReturnRepository`, `IWarrantyRepository` | Services in Person, Return, and Warranty modules coupled to concrete file handlers. | Created abstraction repository interfaces for all three secondary modules. | `d4e5f6a` | [#40](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/40) | Developer 2 |
+| **V-10** | High Cohesion | `PersonRepository` | Combined file parsing, data validation, and business rule evaluation in one class. | Refactored `PersonRepository` focusing strictly on persistence operations. | `e7f8a9b` | [#40](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/40) | Developer 2 |
+| **V-11** | Information Expert | `Return`, `Warranty` | Return deadline validation and extended warranty costs computed externally. | Encapsulated `canBeReturned()` and cost calculations inside `Return` and `Warranty`. | `c1d2e3f` | [#40](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/40) | Developer 2 |
+| **V-12** | Controller | `ReturnService`, `WarrantyService` | Services instantiated repositories internally using concrete `new` keywords. | Converted services to accept repository interfaces via constructor injection. | `b5a4f3e` | [#40](https://github.com/MiguelVasquezA/GamerZoneUnicesar/pull/40) | Developer 2 |
 
 ---
 
 ## 5. Border Findings Between Members
-* **Finding:** `ConsoleMenu` (Technical Leader) directly instantiates and calls methods from `ProductService` (Developer 1) without abstraction boundaries.
-* **Resolution:** Consolidated under `V-03`. The Technical Leader will refactor `ConsoleMenu` to interact with service interfaces, while Developer 1 exposes clean service boundaries.
+* **Finding:** `ConsoleMenu` (Technical Leader) directly instantiated concrete services from Developer 1 (`ProductService`) and Developer 2 (`PersonService`, `ReturnService`, `WarrantyService`), creating tight coupling across responsibilities.
+* **Resolution:** Consolidated under `V-04` and `V-12`. Technical Leader refactored `Main.java` as the central bootstrapper passing service abstractions, while Developer 1 and Developer 2 exposed constructor-injected interfaces.
 
 ---
 
 ## 6. Out-of-Scope Findings (Functional Defects)
-* **Defect 1:** Product price formatting does not restrict negative values during manual input.
+* **Defect 1:** Product price formatting does not restrict negative values during manual console input.
+* **Defect 2:** Date validation in `Return` permits future-dated transactions if systemic system clocks differ.
 * **Note:** Per Requirement 7 guidelines, functional bug fixes that alter user-observed behaviors are out of scope for Phase 2 refactoring to guarantee non-regression.

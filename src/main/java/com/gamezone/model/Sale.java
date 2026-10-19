@@ -1,15 +1,17 @@
 package com.gamezone.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Represents a sale transaction within the GameZone store.
- * Stores transaction details, customer and seller references, purchased items,
- * and tracks applied promotions and discount amounts.
+ * Manages transaction details, line items, seller information, and applied discounts.
+ *
+ * Implements Information Expert, Creator, and Protected Variations GRASP patterns.
  *
  * @author Miguel Vasquez
- * @version 1.2
+ * @version 2.0
  */
 public class Sale implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -18,201 +20,88 @@ public class Sale implements Serializable {
     private String date;
     private String client;
     private String seller;
-    private List<Product> products;
+    private List<SaleItem> items; // Replaces direct List<Product> to snapshot prices
     private double totalAmount;
     private String appliedPromotionName;
     private double discountAmount;
 
     /**
      * Constructs a new Sale instance with initial purchase details.
-     *
-     * @param saleId Unique identifier for the sale.
-     * @param client Customer identifier.
-     * @param products List of purchased products.
-     * @param totalAmount Final total amount after discounts.
-     * @param discountAmount Applied discount amount.
-     * @param date Date when the sale occurred.
-     * @param seller Staff/seller identifier.
      */
-    public Sale(String saleId, String client, List<Product> products, double totalAmount, double discountAmount, String date, String seller) {
+    public Sale(String saleId, String client, List<SaleItem> items, double discountAmount, String date, String seller) {
         this.saleId = saleId;
         this.client = client;
-        this.products = products;
-        this.totalAmount = totalAmount;
+        this.items = items != null ? items : new ArrayList<>();
         this.discountAmount = discountAmount;
         this.date = date;
         this.seller = seller != null ? seller : "N/A";
         this.appliedPromotionName = "None";
+        this.totalAmount = calculateTotal();
     }
 
     /**
-     * Overloaded constructor for compatibility with simpler service calls.
+     * Overloaded constructor for compatibility.
      */
-    public Sale(String saleId, String client, List<Product> products, double totalAmount, double discountAmount, String date) {
-        this(saleId, client, products, totalAmount, discountAmount, date, "N/A");
+    public Sale(String saleId, String client, List<SaleItem> items, double discountAmount, String date) {
+        this(saleId, client, items, discountAmount, date, "N/A");
     }
 
     /**
-     * Calculates the total amount of the sale based on the products.
+     * Creator Pattern: Sale manages and appends line items to its internal aggregate.
      *
-     * @return the total price of the sale
+     * @param item the SaleItem instance to add
+     */
+    public void addItem(SaleItem item) {
+        if (this.items == null) {
+            this.items = new ArrayList<>();
+        }
+        this.items.add(item);
+        this.totalAmount = calculateTotal();
+    }
+
+    /**
+     * Information Expert: Calculates total amount summing subtotal from line items.
+     *
+     * @return the net total price of the sale after discounts
      */
     public double calculateTotal() {
         double total = 0.0;
-        if (products != null) {
-            for (Product p : products) {
-                total += p.getPrice();
+        if (items != null) {
+            for (SaleItem item : items) {
+                total += item.getSubtotal();
             }
         }
-        return total;
+        return Math.max(0.0, total - discountAmount);
     }
 
-    /** @return Sale identifier. */
-    public String getSaleId() {
-        return saleId;
+    // Getters and Setters
+    public String getSaleId() { return saleId; }
+    public void setSaleId(String saleId) { this.saleId = saleId; }
+
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
+
+    public String getClient() { return client; }
+    public void setClient(String client) { this.client = client; }
+
+    public String getSeller() { return seller; }
+    public void setSeller(String seller) { this.seller = seller; }
+
+    public List<SaleItem> getItems() { return items; }
+    public void setItems(List<SaleItem> items) {
+        this.items = items;
+        this.totalAmount = calculateTotal();
     }
 
-    /** @param saleId Sale identifier to set. */
-    public void setSaleId(String saleId) {
-        this.saleId = saleId;
-    }
+    public double getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(double totalAmount) { this.totalAmount = totalAmount; }
 
-    /** @return Sale date string. */
-    public String getDate() {
-        return date;
-    }
+    public String getAppliedPromotionName() { return appliedPromotionName; }
+    public void setAppliedPromotionName(String appliedPromotionName) { this.appliedPromotionName = appliedPromotionName; }
 
-    /** @param date Sale date string to set. */
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    /** @return Client identifier. */
-    public String getClient() {
-        return client;
-    }
-
-    /** @param client Client identifier to set. */
-    public void setClient(String client) {
-        this.client = client;
-    }
-
-    /** @return Seller identifier. */
-    public String getSeller() {
-        return seller;
-    }
-
-    /** @param seller Seller identifier to set. */
-    public void setSeller(String seller) {
-        this.seller = seller;
-    }
-
-    /** @return Purchased products list. */
-    public List<Product> getProducts() {
-        return products;
-    }
-
-    /** @param products Purchased products list to set. */
-    public void setProducts(List<Product> products) {
-        this.products = products;
-    }
-
-    /** @return Final total amount. */
-    public double getTotalAmount() {
-        return totalAmount;
-    }
-
-    /** @param totalAmount Final total amount to set. */
-    public void setTotalAmount(double totalAmount) {
-        this.totalAmount = totalAmount;
-    }
-
-    /** @return Applied promotion name. */
-    public String getAppliedPromotionName() {
-        return appliedPromotionName;
-    }
-
-    /** @param appliedPromotionName Applied promotion name to set. */
-    public void setAppliedPromotionName(String appliedPromotionName) {
-        this.appliedPromotionName = appliedPromotionName;
-    }
-
-    /** @return Applied discount amount. */
-    public double getDiscountAmount() {
-        return discountAmount;
-    }
-
-    /** @param discountAmount Applied discount amount to set. */
+    public double getDiscountAmount() { return discountAmount; }
     public void setDiscountAmount(double discountAmount) {
         this.discountAmount = discountAmount;
-    }
-
-    /**
-     * Generates a formatted text receipt for the sale.
-     *
-     * @return formatted receipt string
-     */
-    public String generateReceipt() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("=========================================\n");
-        sb.append("           GAMERZONE UNICESAR            \n");
-        sb.append("             SALE RECEIPT                \n");
-        sb.append("=========================================\n");
-        sb.append("Sale ID: ").append(saleId).append("\n");
-        sb.append("Date: ").append(date).append("\n");
-        sb.append("Client ID: ").append(client).append("\n");
-        sb.append("Seller ID: ").append(seller).append("\n");
-        sb.append("-----------------------------------------\n");
-        sb.append("ITEMS:\n");
-
-        double subtotal = 0.0;
-        if (products != null) {
-            for (Product p : products) {
-                sb.append(" - ").append(p.getTitle())
-                        .append(" ($").append(String.format("%.2f", p.getPrice())).append(")\n");
-                subtotal += p.getPrice();
-            }
-        }
-
-        sb.append("-----------------------------------------\n");
-        sb.append("Subtotal: $").append(String.format("%.2f", subtotal)).append("\n");
-
-        if (appliedPromotionName != null && !appliedPromotionName.isEmpty()) {
-            sb.append("Discount (").append(appliedPromotionName).append("): -$")
-                    .append(String.format("%.2f", discountAmount)).append("\n");
-        } else {
-            sb.append("Discount: $0.00\n");
-        }
-
-        double warrantyCost = totalAmount - (subtotal - discountAmount);
-        if (warrantyCost > 0) {
-            sb.append("Extended Warranty Cost: +$").append(String.format("%.2f", warrantyCost)).append("\n");
-        }
-
-        sb.append("-----------------------------------------\n");
-        sb.append("TOTAL FINAL: $").append(String.format("%.2f", totalAmount)).append("\n");
-        sb.append("=========================================\n");
-
-        return sb.toString();
-    }
-
-    /**
-     * Checks if this sale is eligible for a return.
-     * A return can only be registered within 30 calendar days following the sale date.
-     *
-     * @return true if the sale date is within 30 days of today; false otherwise or if date is invalid
-     */
-    public boolean canBeReturned() {
-        if (this.date == null || this.date.trim().isEmpty()) {
-            return false;
-        }
-        try {
-            String dateOnly = this.date.contains("T") ? this.date.split("T")[0] : this.date.trim();
-            java.time.LocalDate saleLocalDate = java.time.LocalDate.parse(dateOnly);
-            long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(saleLocalDate, java.time.LocalDate.now());
-            return daysBetween >= 0 && daysBetween <= 30;
-        } catch (java.time.format.DateTimeParseException e) {
-            return false;
-        }
+        this.totalAmount = calculateTotal();
     }
 }

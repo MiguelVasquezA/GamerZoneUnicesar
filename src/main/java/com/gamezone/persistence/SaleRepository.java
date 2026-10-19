@@ -1,86 +1,60 @@
 package com.gamezone.persistence;
 
-import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Sale;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Responsible for saving and loading sale records to and from disk.
- *
- * @author Miguel Vasquez
- * @version 1.1
+ * Concrete implementation of sales file storage.
+ * Implements ISaleRepository interface to comply with Dependency Inversion.
  */
-public class SaleRepository {
-
+public class SaleRepository implements ISaleRepository {
     private final String filePath;
 
-    /**
-     * Constructs a SaleRepository with a specified file path.
-     *
-     * @param filePath the path of the file where sales are stored
-     */
     public SaleRepository(String filePath) {
         this.filePath = filePath;
     }
 
-    /**
-     * Saves the list of sales into the storage file.
-     *
-     * @param sales the list of Sale objects to persist
-     */
-    public void saveSale(List<Sale> sales) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
+    public SaleRepository() {
+        this("data/sales.dat");
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public synchronized List<Sale> findAll() {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return new ArrayList<>();
+        }
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+            return (List<Sale>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public synchronized void save(Sale sale) {
+        List<Sale> sales = findAll();
+        sales.add(sale);
+        File file = new File(filePath);
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
             oos.writeObject(sales);
         } catch (IOException e) {
-            throw new PersistenceException("Error saving sales to file: " + filePath, e);
+            throw new RuntimeException("Error persisting sale transaction.", e);
         }
     }
 
-    /**
-     * Loads the list of sales from the storage file.
-     *
-     * @return the list of stored Sale objects, or an empty list if the file does not exist
-     */
-    @SuppressWarnings("unchecked")
-    public List<Sale> loadSales() {
-        List<Sale> sales = new ArrayList<>();
-        File file = new File(filePath);
-
-        // Check if file exists before attempting to read to avoid "file not found" errors on initial run
-        if (!file.exists()) {
-            return sales;
-        }
-
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            sales = (List<Sale>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            throw new PersistenceException("Error loading sales from file: " + filePath, e);
-        }
-        return sales;
-    }
-
-    /**
-     * Finds a specific sale by its unique identifier.
-     *
-     * @param saleId the unique identifier of the sale
-     * @return the matching Sale object, or null if not found
-     */
-    public Sale findById(String saleId) {
-        if (saleId == null || saleId.trim().isEmpty()) {
-            return null;
-        }
-        List<Sale> sales = loadSales();
-        return sales.stream()
-                .filter(s -> s.getSaleId() != null && s.getSaleId().equals(saleId))
-                .findFirst()
-                .orElse(null);
+    @Override
+    public Optional<Sale> findById(String id) {
+        return findAll().stream()
+                .filter(s -> s.getSaleId().equalsIgnoreCase(id))
+                .findFirst();
     }
 }

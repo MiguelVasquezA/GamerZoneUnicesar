@@ -3,6 +3,7 @@ package com.gamezone.service;
 import com.gamezone.model.Product;
 import com.gamezone.model.Return;
 import com.gamezone.model.Sale;
+import com.gamezone.model.SaleItem;
 import com.gamezone.persistence.ReturnRepository;
 
 import java.time.LocalDate;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
  * and warranty cancellation integration (Task A7).
  *
  * @author Desarrolladora 2
- * @version 1.6
+ * @version 2.0
  */
 public class ReturnService {
 
@@ -25,7 +26,7 @@ public class ReturnService {
     private final SaleService saleService;
     private final ProductService productService;
     private final AccessoryService accessoryService;
-    private final WarrantyService warrantyService; // Integrado para la tarea A7
+    private final WarrantyService warrantyService;
 
     /**
      * Constructs a new ReturnService with its required repository and service dependencies.
@@ -54,8 +55,8 @@ public class ReturnService {
      * @throws IllegalArgumentException if the sale does not exist, the return period has expired, or items do not belong to the sale
      */
     public Return registerReturn(String saleId, List<String> productIds, String reason) {
-        // 1. Find the sale using listAllSales() provided by SaleService
-        Sale sale = saleService.listAllSales().stream()
+        // 1. Find the sale using getAllSales() and getSaleId() provided by the refactored Sale class
+        Sale sale = saleService.getAllSales().stream()
                 .filter(s -> s.getSaleId().equals(saleId))
                 .findFirst()
                 .orElse(null);
@@ -64,15 +65,17 @@ public class ReturnService {
             throw new IllegalArgumentException("La venta original con ID " + saleId + " no existe.");
         }
 
-        // 2. Validate return time window (30 days limit)
-        if (!sale.canBeReturned()) {
+        // 2. Validate return time window (30 days limit) based on sale date string
+        LocalDate saleDate = LocalDate.parse(sale.getDate());
+        if (saleDate.plusDays(30).isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("El plazo de 30 días para realizar devoluciones de esta venta ha expirado.");
         }
 
-        // 3. Validate product/accessory ownership
+        // 3. Validate product/accessory ownership using SaleItem structure
         List<Product> productsToReturn = new ArrayList<>();
         for (String productId : productIds) {
-            Product product = sale.getProducts().stream()
+            Product product = sale.getItems().stream()
+                    .map(SaleItem::getProduct)
                     .filter(p -> p.getId().equals(productId))
                     .findFirst()
                     .orElse(null);
@@ -85,11 +88,7 @@ public class ReturnService {
 
         // 4. Restore inventory stock (delegating to AccessoryService if it's an accessory, otherwise to ProductService)
         for (Product product : productsToReturn) {
-            if (accessoryService.findById(product.getId()) != null) {
-                accessoryService.restoreStock(product.getId(), 1);
-            } else {
-                productService.updateStock(product.getId(), product.getStock() + 1);
-            }
+            restoreItemStock(product);
         }
 
         // 4.1. Cancel associated warranty if it exists (Task A7 - Anulación de Garantía)
@@ -107,6 +106,18 @@ public class ReturnService {
         returnRepository.saveAll(allReturns);
 
         return newReturn;
+    }
+
+    /**
+     * Restores stock for a returned item, handling whether it is an accessory or a general product internally.
+     *
+     * @param product the product or accessory to restore
+     */
+    private void restoreItemStock(Product product) {
+        boolean restoredAsAccessory = accessoryService.restoreStock(product.getId(), 1);
+        if (!restoredAsAccessory) {
+            productService.registerProduct(product);
+        }
     }
 
     /**
@@ -150,7 +161,7 @@ public class ReturnService {
      * @return the net financial balance for the period
      */
     public double generateMonthlyBalance(int month, int year) {
-        double totalSales = saleService.listAllSales().stream()
+        double totalSales = saleService.getAllSales().stream()
                 .filter(s -> {
                     LocalDate date = LocalDate.parse(s.getDate());
                     return date.getMonthValue() == month && date.getYear() == year;

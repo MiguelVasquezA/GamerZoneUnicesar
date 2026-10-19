@@ -94,3 +94,129 @@
 * **Prompt:** "How should I approach the next adjustment for accessory stock restoration and monthly balance calculations?"
 * **Usage:** Outlined the technical steps required for implementing `restoreStock` in `AccessoryService` and updating financial calculations in `ReturnService`.
 * **Reflection:** Established a structured roadmap for tackling the remaining integration tasks efficiently.
+
+## Phase 1: Audit
+
+31. **Date: 2026-10-06**
+    - **Query/Prompt:** "How to evaluate the Creator pattern when a repository instantiates subclasses based on a CSV type discriminator?"
+    - **Purpose:** Understanding how to properly justify object creation logic in data repositories.
+
+32. **Date: 2026-10-07**
+    - **Query/Prompt:** "What is the key difference between Information Expert and Low Coupling when reviewing domain service classes?"
+    - **Purpose:** Clarifying pattern definitions to write accurate audit findings.
+
+33. **Date: 2026-10-08**
+    - **Query/Prompt:** "How to structure an individual GRASP audit report in Markdown following the project template?"
+    - **Purpose:** Ensuring proper section headers and table formats for the audit document.
+
+34. **Date: 2026-10-09**
+    - **Query/Prompt:** "Git command to create and switch to the feature/grasp-audit branch from develop."
+    - **Purpose:** Setting up version control for the audit phase.
+
+35. **Date: 2026-10-10**
+    - **Query/Prompt:** "How to document evidence for a Low Coupling violation in a service class handling multiple inventories?"
+    - **Purpose:** Formulating technical explanations for code coupling issues.
+
+36. **Date: 2026-10-11**
+    - **Query/Prompt:** "What constitutes a valid 'Not Applicable' verdict for the Controller pattern in domain service classes?"
+    - **Purpose:** Verifying architectural boundaries where UI controllers do not apply.
+
+37. **Date: 2026-10-12**
+    - **Query/Prompt:** "How to write clear consequences and solution proposals for a Pure Fabrication violation?"
+    - **Purpose:** Improving the quality of technical recommendations in the audit report.
+
+38. **Date: 2026-10-13**
+    - **Query/Prompt:** "Git command to stage changes, commit with docs: prefix, and push the audit branch."
+    - **Purpose:** Following Conventional Commits for documentation tasks.
+
+39. **Date: 2026-10-14**
+    - **Query/Prompt:** "How to check team coverage mapping to ensure no classes were missed during the individual audits?"
+    - **Purpose:** Aligning individual reports with the technical leader's consolidation plan.
+
+40. **Date: 2026-10-15**
+    - **Query/Prompt:** "What steps are required to review another team member's audit report before merging?"
+    - **Purpose:** Preparing for peer review responsibilities during Phase 1.
+
+---
+
+## Phase 2: Refactoring & Correction
+
+41. **Date: 2026-10-16**
+    - **Query/Prompt:** "How to create and check out the feature/grasp-refactor branch from an updated develop branch?"
+    - **Purpose:** Initializing the refactoring phase environment safely.
+
+42. **Date: 2026-10-16**
+    - **Query/Prompt:** "Maven command to clean and compile the project and check for build errors."
+    - **Purpose:** Verifying initial project compilation status.
+
+43. **Date: 2026-10-17**
+    - **Query/Prompt:** "How to refactor conditional inventory routing inside ReturnService to reduce structural coupling?"
+    - **Purpose:** Requesting design patterns to eliminate tight coupling between services.
+
+44. **Date: 2026-10-17**
+    - **Query/Prompt:** "How to extract a private helper method in Java to encapsulate inventory restoration logic?"
+    - **Purpose:** Improving code maintainability without altering external behavior.
+
+45. **Date: 2026-10-17**
+    - **Query/Prompt:** "Explanation of compiler error: Cannot resolve method when interacting with refactored model classes."
+    - **Purpose:** Resolving method signature mismatches caused by team refactoring.
+
+46. **Date: 2026-10-18**
+    - **Query/Prompt:** "How to adapt service method calls to match the updated Sale and SaleItem class structure?"
+    - **Purpose:** Ensuring compatibility with changes made by the technical leader.
+
+47. **Date: 2026-10-18**
+    - **Query/Prompt:** "Git command to add modified service files and write an atomic refactor commit referencing a violation ID."
+    - **Purpose:** Applying proper conventional commit messages with `V-ACC-01`.
+
+48. **Date: 2026-10-18**
+    - **Query/Prompt:** "How to format a markdown table row for the grasp-refactor-log.md change log?"
+    - **Purpose:** Maintaining proper traceability and documentation standards.
+
+49. **Date: 2026-10-19**
+    - **Query/Prompt:** "Maven command to verify compilation success after applying code refactors."
+    - **Purpose:** Pre-check before opening a Pull Request.
+
+50. **Date: 2026-10-19**
+    - **Query/Prompt:** "How to write a descriptive Pull Request summary listing fixed violations and non-regression evidence?"
+    - **Purpose:** Preparing the PR description for code review.
+
+51. **Date: 2026-10-20**
+    - **Query/Prompt:** "Explanation of how Protected Variations safeguards high-level services against future domain modifications."
+    - **Purpose:** Conceptual verification of architectural patterns implemented in the module.
+
+52. **Date: 2026-10-20**
+    - **Query/Prompt:** "Git command to inspect local commit history and verify atomic commit requirements."
+    - **Purpose:** Validating quantitative commit constraints before final submission.
+
+53. **Date: 2026-10-21**
+    - **Query/Prompt:** "How to verify non-regression across console menu operations without breaking existing CSV data files?"
+    - **Purpose:** Planning the verification strategy for the system functionality.
+
+54. **Date: 2026-10-21**
+    - **Query/Prompt:** "Explanation of how to handle Optional types safely when querying domain repositories."
+    - **Purpose:** Reviewing best practices for null safety in service layers.
+
+55. **Date: 2026-10-22**
+    - **Query/Prompt:** "Git command to merge feature branch updates and delete local/remote feature branches safely."
+    - **Purpose:** Managing branch lifecycle tasks upon PR approval.
+
+56. **Date: 2026-10-22**
+    - **Query/Prompt:** "What key points should be prepared for the oral sustantation regarding Developer 2 refactoring decisions?"
+    - **Purpose:** Preparing individual defense points for the final evaluation.
+
+57. **Date: 2026-10-23**
+    - **Query/Prompt:** "How to review the README.md file to ensure architectural changes and design patterns are documented?"
+    - **Purpose:** Verifying project documentation completeness.
+
+58. **Date: 2026-10-24**
+    - **Query/Prompt:** "Git command to verify that all branches are synchronized with the remote main and develop branches."
+    - **Purpose:** Final repository hygiene check before delivery.
+
+59. **Date: 2026-10-25**
+    - **Query/Prompt:** "How to organize the AI usage log into clear Phase 1 and Phase 2 sections according to guidelines?"
+    - **Purpose:** Ensuring complete compliance with workshop documentation requirements.
+
+60. **Date: 2026-10-25**
+    - **Query/Prompt:** "Final review of maven build logs and compilation status to guarantee error-free delivery."
+    - **Purpose:** Final validation check before project sustantation.

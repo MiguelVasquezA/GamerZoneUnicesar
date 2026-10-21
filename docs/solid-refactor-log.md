@@ -29,3 +29,13 @@
 | `ProductService` | Injected `IProductRepository` abstraction | `V-08` | DIP | Pending | Developer 1 |
 | `ConsoleInputReader` | Extracted CLI terminal input parsing from `ConsoleMenu` | `V-02` | SRP | Pending | Technical Leader |
 | `ConsoleMenu` | Bound controller to high-level service interfaces | `V-04`, `V-06` | ISP, DIP | Pending | Technical Leader |
+
+---
+### Technical Leader Refactoring Entries
+
+| Class / File | Changes Applied | Violation ID | Principle Applied | Commit / PR | Responsible Member |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `ISaleRepository` | Created interface abstraction for sales storage | `V-LEAD-03` | DIP | Commit | Technical Leader |
+| `SaleRepository` | Implemented `ISaleRepository` interface | `V-LEAD-03` | DIP | Commit | Technical Leader |
+| `SaleService` | Injected `ISaleRepository` via constructor injection | `V-LEAD-03` | DIP | Commit | Technical Leader |
+| `Sale` / `ReceiptFormatter` | Delegated receipt string formatting to pure fabrication `ReceiptFormatter` | `V-LEAD-01` | SRP | Commit | Technical Leader |

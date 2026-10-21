@@ -570,13 +570,13 @@ This document logs the use of AI assistance during the development of the Produc
 
 **Date:** 2026-10-18
 
-**Topic:** Documenting commit hashes and PR links in `docs/changelog.md`
+**Topic:** Documenting commit hashes and PR links in `../docs/grasp-refactor-log.md`
 
 **Prompt Summary:** Requested assistance structuring the traceability matrix linking Product violations (V-05 to V-08) to their corresponding commits and Pull Request #39.
 
 **AI Assistance Received:** Provided Markdown table layout linking Violation ID, GRASP Pattern, Commit Hash, PR link, and Responsible Developer.
 
-**Applied Outcome:** Updated Product module entries in `docs/changelog.md`.
+**Applied Outcome:** Updated Product module entries in `../docs/grasp-refactor-log.md`.
 
 ---
 

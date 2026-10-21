@@ -1,14 +1,14 @@
 # AI Usage Log - Developer 1
 
 ## Overview
-This document logs the authorized use of AI assistance during the development, auditing, and refactoring phases for the Product and Return modules in GamerZoneUnicesar. The AI was used strictly as an auxiliary tool for syntax checks, exception handling patterns, terminal Git commands, and English technical vocabulary.
+This document logs the authorized use of AI assistance during the development, auditing, and refactoring phases for the Product, Return, and related modules in GamerZoneUnicesar. The AI was used strictly as an auxiliary tool for syntax checks, exception handling patterns, terminal Git commands, and English technical vocabulary, in accordance with the course policy.
 
 ---
 
 ## Log Entries - Requirement 7: GRASP Patterns
 
 ### Entry 1: Java File Persistence Syntax Check
-* **Date:** 2026-09-08
+* **Date:** 2026-10-08
 * **Topic:** CSV line parsing and string splitting in Java.
 * **Prompt Summary:** Asked for standard syntax using `String.split()` with safe delimiter handling for text files.
 * **AI Assistance Received:** Provided syntax examples for parsing lines safely and handling potential array index boundary errors.

@@ -7,7 +7,7 @@ import java.util.Optional;
 
 /**
  * Service managing product operations.
- * Interacts with storage strictly through the IProductRepository abstraction.
+ * Interacts with storage strictly through the IProductRepository abstraction (DIP / V-08).
  */
 public class ProductService {
     private final IProductRepository productRepository;
@@ -27,14 +27,14 @@ public class ProductService {
     }
 
     /**
-     * Information Expert Pattern (Fix V-DEV1-01):
+     * Information Expert Pattern (SRP / V-01):
      * Delegates stock reduction logic directly to the Product domain entity.
      */
     public void reduceStock(String productId, int quantity) {
         Optional<Product> optionalProduct = productRepository.findById(productId);
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
-            product.reduceStock(quantity); // Encapsulated mutation inside entity
+            product.reduceStock(quantity);
             productRepository.update(product);
         } else {
             throw new IllegalArgumentException("Product with ID " + productId + " not found.");

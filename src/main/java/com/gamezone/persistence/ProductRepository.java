@@ -8,7 +8,7 @@ import java.util.Optional;
 
 /**
  * Concrete implementation of product storage.
- * Implements IProductRepository interface to comply with Dependency Inversion.
+ * Implements IProductRepository interface to comply with Dependency Inversion (DIP / V-08).
  */
 public class ProductRepository implements IProductRepository {
     private final String filePath;

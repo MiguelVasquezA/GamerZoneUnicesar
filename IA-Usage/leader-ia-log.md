@@ -1,21 +1,21 @@
 # AI Usage Log - Technical Leader
 
 ## Overview
-This document logs the authorized use of AI assistance during the leadership, orchestration, audit consolidation, and refactoring phases for GamerZoneUnicesar. AI tools were utilized strictly for terminal environment configuration, Mermaid diagram syntax validation, Git Flow guidance, and documentation formatting.
+This document logs the authorized use of AI assistance during the leadership, orchestration, audit consolidation, and refactoring phases for GamerZoneUnicesar. AI tools were utilized strictly as an auxiliary tool for terminal environment configuration, Mermaid diagram syntax validation, Git Flow guidance, and documentation formatting, in compliance with course policies.
 
 ---
 
 ## Log Entries - Requirement 7: GRASP Patterns
 
 ### Entry 1: Terminal Menu Input Loop Syntax
-* **Date:** 2026-09-08
+* **Date:** 2026-10-08
 * **Topic:** Console Scanner buffer clearing.
 * **Prompt Summary:** Consulted on handling `Scanner.nextLine()` buffer clearing after reading numeric integers.
 * **AI Assistance Received:** Clarified standard patterns to prevent skipped input lines in CLI menus.
 * **Applied Outcome:** Ensured clean menu input handling in `ConsoleMenu.java`.
 
 ### Entry 2: Git Merge Conflict Resolution Guidance
-* **Date:** 2026-09-28
+* **Date:** 2026-10-12
 * **Topic:** Resolving merge conflicts in feature branches.
 * **Prompt Summary:** Asked for terminal commands to abort or complete a stuck Git merge session.
 * **AI Assistance Received:** Provided standard Git commands (`git merge --abort`, `git status`).

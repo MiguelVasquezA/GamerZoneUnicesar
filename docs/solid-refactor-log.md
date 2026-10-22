@@ -1,4 +1,4 @@
-# SOLID Refactoring Log & Behavior Preservation Record
+# SOLID Refactor Log & Behavior Preservation Record
 
 **Repository:** GamerZoneUnicesar  
 **Branch:** `feature/solid-refactor`  
@@ -29,8 +29,10 @@
 | `ProductService` | Injected `IProductRepository` abstraction | `V-08` | DIP | Pending | Developer 1 |
 | `ConsoleInputReader` | Extracted CLI terminal input parsing from `ConsoleMenu` | `V-02` | SRP | Pending | Technical Leader |
 | `ConsoleMenu` | Bound controller to high-level service interfaces | `V-04`, `V-06` | ISP, DIP | Pending | Technical Leader |
+| `ReturnRepository` | Decoupled persistence component by removing direct dependencies on high-level business services (`SaleService`, `ProductService`) | `V-01` | DIP | Pending | Developer 2 |
 
 ---
+
 ### Technical Leader Refactoring Entries
 
 | Class / File | Changes Applied | Violation ID | Principle Applied | Commit / PR | Responsible Member |

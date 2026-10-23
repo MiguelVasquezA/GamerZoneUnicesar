@@ -5,7 +5,6 @@ import java.util.List;
 /**
  * Concrete class representing a gaming controller accessory
  */
-
 public class Controller extends Accessory {
     private String connectionType;
 
@@ -25,5 +24,12 @@ public class Controller extends Accessory {
     @Override
     public String getDescription() {
         return "Controller: " + getTitle() + " | Price: $" + getPrice() + " | Stock: " + getStock() + " | Connection: " + connectionType;
+    }
+
+    @Override
+    public String toCsvRecord() {
+        return String.format("CONTROLLER;%s;%s;%.2f;%d;%s;%s",
+                getId(), getTitle(), getPrice(), getStock(),
+                String.join(",", getCompatibleConsoleIds()), connectionType);
     }
 }

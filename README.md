@@ -30,6 +30,25 @@ An object-oriented Java console application designed to manage products, accesso
   - Decoupled, dedicated validation components enforcing pre-conditions, stock limits, and unique identification constraint checks.
   - Polymorphic exception translation and central catch handling ensuring continuous, error-resilient console UI execution.
 
+## Requerimiento 7: Auditoría y Cumplimiento SOLID (Code Review)
+- **Análisis y Refactorización Estructural:** Auditoría de código sobre las clases del modelo y servicios para identificar violaciones a los principios SOLID.
+- **Correcciones Principales Aplicadas:**
+  - **Single Responsibility Principle (SRP):** Desacoplamiento de la lógica de presentación/formateo de comprobantes fuera de los modelos (`Return`, `Warranty`) hacia formateadores o servicios dedicados.
+  - **Open/Closed Principle (OCP):** Extensibilidad mediante jerarquías abstractas e interfaces en módulos de promociones, garantías y accesorios sin modificar el código base.
+  - **Liskov Substitution Principle (LSP):** Garantía de sustitución correcta en las jerarquías de productos (`Accessory` / `Product`) y garantías (`BasicWarranty` / `ExtendedWarranty`).
+  - **Dependency Inversion Principle (DIP):** Inyección de dependencias de repositorios y servicios a través de sus construcciones en lugar de instanciaciones rígidas.
+
+---
+
+## Requerimiento 8: Despliegue y Pruebas Integradas (CI/CD)
+- **Persistencia Binaria / Objeto Serializable:** Implementación completa de la interfaz `java.io.Serializable` en todas las entidades del dominio (`SaleItem`, `Return`, `Warranty`, `BasicWarranty`, `ExtendedWarranty`) para asegurar la persistencia en archivos planos/binarios sin errores de I/O.
+- **Manejo de Transacciones e Integración Final:**
+  - Sincronización automática del ciclo de vida entre Ventas, Garantías y Devoluciones.
+  - Anulación en cascada de garantías activas al procesar devoluciones parciales o totales de ventas.
+  - Restauración automática e inteligente de inventario para productos generales y accesorios en sus respectivos servicios.
+  - Generación de reportes consolidados y balance financiero neto mensual (Ventas totales vs. Reembolsos).
+- **Pruebas de Flujo Completo (E2E):** Cobertura de escenarios integrados desde el menú interactivo por consola en `ConsoleMenu.java`.
+
 ---
 
 ## Layered Architecture & Project Structure

@@ -47,10 +47,7 @@ public class Main {
         // 4. SaleService
         SaleService saleService = new SaleService(
                 saleRepository,
-                productService,
-                accessoryService,
-                warrantyService,
-                personService
+                productRepository
         );
 
         // 5. ReturnRepository & ReturnService (Con WarrantyService como 5to parámetro)

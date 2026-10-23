@@ -25,7 +25,7 @@ This audit covers the source code modules, requirements, and classes under the r
 
 ### 2.1 Evaluation Summary
 * **`Product.java`:** **CORRECT.** The class strictly acts as an Information Expert domain model holding state and managing its internal stock balance.
-* **`ProductRepository.java`:** **VIOLATION.** Violates SRP because it combines file I/O operations (reading and writing `../../data/product.txt`) with domain object parsing and query filtering.
+* **`ProductRepository.java`:** **VIOLATION.** Violates SRP because it combines file I/O operations (reading and writing `product.txt`) with domain object parsing and query filtering.
 * **`ProductService.java`:** **CORRECT.** Focuses exclusively on business operations related to product stock validations and inventory updates.
 
 ---

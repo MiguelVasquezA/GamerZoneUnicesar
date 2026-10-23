@@ -3,9 +3,8 @@ package com.gamezone.model;
 import java.util.List;
 
 /**
- * Concrete class representing a clable Accessory.
+ * Concrete class representing a cable Accessory.
  */
-
 public class Cable extends Accessory {
     private double length;
     private String connectorType;
@@ -36,5 +35,12 @@ public class Cable extends Accessory {
     public String getDescription() {
         return String.format("Cable: %s | Price: $%.2f | Stock: %d | Length: %.1fm | Connector: %s",
                 getTitle(), getPrice(), getStock(), length, connectorType);
+    }
+
+    @Override
+    public String toCsvRecord() {
+        return String.format("CABLE;%s;%s;%.2f;%d;%s;%s;%.1f",
+                getId(), getTitle(), getPrice(), getStock(),
+                String.join(",", getCompatibleConsoleIds()), connectorType, length);
     }
 }

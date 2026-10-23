@@ -49,7 +49,7 @@ Boundary violations occur when a component assigned to one team member depends i
 To guarantee that SOLID refactorings do not alter external application behavior, the team enforces a zero-regression testing protocol:
 
 1. **Execution Scope:** Every CLI menu option (Products, Sales, Returns, Warranties, Promotions, Exception handling) is tested using predefined inputs.
-2. **Data Consistency:** File persistence formats (`product.txt`, `sales.txt`, `persons.txt`) must remain 100% identical before and after refactoring.
+2. **Data Consistency:** File persistence formats (`../data/product.txt`, `sales.txt`, `persons.txt`) must remain 100% identical before and after refactoring.
 3. **Verification Stages:**
     * **Stage A (Baseline):** Executed on `develop` prior to Phase 2 refactoring to capture expected output logs.
     * **Stage B (Per PR):** Executed by each member on `feature/solid-refactor` before merging any refactoring Pull Request.

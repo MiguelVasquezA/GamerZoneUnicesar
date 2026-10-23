@@ -74,16 +74,16 @@ public class WarrantyRepository {
                 String saleId = parts[3];
                 LocalDate startDate = parts.length > 4 && !parts[4].isEmpty() ? LocalDate.parse(parts[4]) : LocalDate.now();
 
-                // Find product by ID (Corregido con .orElse(null))
+                // Find product by ID (Unwrapping Optional using .orElse(null))
                 Product product = null;
                 if (productService != null) {
-                    product = productService.findById(productId).orElse(null);
+                    product = productService.getProductById(productId).orElse(null);
                 }
 
-                // Find sale by ID (Usando el nuevo método findById de SaleRepository)
+                // Find sale by ID (Unwrapping Optional using .orElse(null))
                 Sale sale = null;
                 if (saleRepository != null) {
-                    sale = saleRepository.findById(saleId);
+                    sale = saleRepository.findById(saleId).orElse(null);
                 }
 
                 if ("BASIC".equalsIgnoreCase(type)) {

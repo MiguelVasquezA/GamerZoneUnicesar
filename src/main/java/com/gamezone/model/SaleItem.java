@@ -1,21 +1,19 @@
 package com.gamezone.model;
 
+import java.io.Serializable;
+
 /**
  * Represents a single line item in a sale with a frozen unit price at the transaction time.
  * Implements the Protected Variations GRASP pattern.
  */
-public class SaleItem {
+public class SaleItem implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private final Product product;
     private final int quantity;
     private final double unitPrice;
 
-    /**
-     * Constructs a SaleItem instance with a snapshot of the current product price.
-     *
-     * @param product  the purchased product
-     * @param quantity the quantity of items purchased
-     * @throws IllegalArgumentException if product is null or quantity is less than or equal to zero
-     */
     public SaleItem(Product product, int quantity) {
         if (product == null) {
             throw new IllegalArgumentException("Product cannot be null.");
@@ -40,11 +38,6 @@ public class SaleItem {
         return unitPrice;
     }
 
-    /**
-     * Calculates the subtotal for this line item based on the frozen unit price.
-     *
-     * @return subtotal amount
-     */
     public double getSubtotal() {
         return unitPrice * quantity;
     }

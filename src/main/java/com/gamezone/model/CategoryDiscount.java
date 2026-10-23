@@ -44,19 +44,29 @@ public class CategoryDiscount extends Promotion {
     }
 
     @Override
-    public double calculateDiscount(Sale sale){
-        if (sale == null || sale.getProducts() == null){
+    public double calculateDiscount(Sale sale) {
+        if (sale == null || sale.getItems() == null) {
             return 0.0;
         }
 
         double eligibleSubtotal = 0.0;
-        for(Product product : sale.getProducts()){
-            if("VIDEOGAME".equalsIgnoreCase(targetCategory) && product instanceof VideoGame){
-                eligibleSubtotal += product.getPrice();
-            } else if("CONSOLE".equalsIgnoreCase(targetCategory) && product instanceof Console){
-                eligibleSubtotal += product.getPrice();
-            } else if("ACCESSORY".equalsIgnoreCase(targetCategory) && product instanceof Accessory){
-                eligibleSubtotal += product.getPrice();
+
+        for (SaleItem item : sale.getItems()) {
+            Product product = item.getProduct();
+            if (product == null) continue;
+
+            boolean isEligible = false;
+
+            if ("VIDEOGAME".equalsIgnoreCase(targetCategory) && product instanceof VideoGame) {
+                isEligible = true;
+            } else if ("CONSOLE".equalsIgnoreCase(targetCategory) && product instanceof Console) {
+                isEligible = true;
+            } else if ("ACCESSORY".equalsIgnoreCase(targetCategory) && product instanceof Accessory) {
+                isEligible = true;
+            }
+
+            if (isEligible) {
+                eligibleSubtotal += item.getSubtotal();
             }
         }
 

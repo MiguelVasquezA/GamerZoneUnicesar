@@ -5,7 +5,6 @@ import java.util.List;
 /**
  * Concrete class representing a memory expansion accessory.
  */
-
 public class Memory extends Accessory {
     private int capacity;
     private String memoryType;
@@ -36,5 +35,12 @@ public class Memory extends Accessory {
     public String getDescription() {
         return String.format("Memory: %s | Price: $%.2f | Stock: %d | Capacity: %dGB | Type: %s",
                 getTitle(), getPrice(), getStock(), capacity, memoryType);
+    }
+
+    @Override
+    public String toCsvRecord() {
+        return String.format("MEMORY;%s;%s;%.2f;%d;%s;%d;%s",
+                getId(), getTitle(), getPrice(), getStock(),
+                String.join(",", getCompatibleConsoleIds()), capacity, memoryType);
     }
 }

@@ -7,10 +7,10 @@ import java.util.List;
  * Abstract class representing a generic accessory product.
  */
 public abstract class Accessory extends Product {
-private List<String> compatibleConsoleIds;
+    private List<String> compatibleConsoleIds;
 
     public Accessory(String id, double price, int stockQuantity, String title, List<String> compatibleConsoleIds) {
-        super(id, price, stockQuantity, title);
+        super(id, title, price, stockQuantity);
         this.compatibleConsoleIds = compatibleConsoleIds != null ? compatibleConsoleIds : new ArrayList<>();
     }
 
@@ -22,9 +22,7 @@ private List<String> compatibleConsoleIds;
         this.compatibleConsoleIds = compatibleConsoleIds;
     }
 
-    public boolean isCompatibleWith(String consoleId){
-        return compatibleConsoleIds.contains(consoleId);
+    public String getDescription() {
+        return String.format("%s | Price: $%.2f | Stock: %d", getTitle(), getPrice(), getStock());
     }
-    @Override
-    public abstract String getDescription();
 }

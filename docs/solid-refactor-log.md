@@ -10,9 +10,9 @@
 
 | Menu Option / Operation | Verification Test Input Data | Expected Output Result | Baseline Status | Post-Refactor Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **1. Register Sale** | Customer ID, Product ID, Quantity | Sale registered, receipt printed, stock decremented in `product.txt` | PASS | PASS |
+| **1. Register Sale** | Customer ID, Product ID, Quantity | Sale registered, receipt printed, stock decremented in `../data/product.txt` | PASS | PASS |
 | **2. Apply Promotion** | Sale with Category/Percentage promo | Correct total amount with applied discount breakdown | PASS | PASS |
-| **3. Process Return** | Valid Sale ID, Product ID | Return logged, stock restored in `product.txt` | PASS | PASS |
+| **3. Process Return** | Valid Sale ID, Product ID | Return logged, stock restored in `../data/product.txt` | PASS | PASS |
 | **4. Warranty Assignment** | Product ID, Extended Warranty option | Extended warranty fee added, warranty record persisted | PASS | PASS |
 | **5. Exception Handling** | Invalid Product ID / Out-of-stock qty | Specific Exception caught, friendly error message in console | PASS | PASS |
 

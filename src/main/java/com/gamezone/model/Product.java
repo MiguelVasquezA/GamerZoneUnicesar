@@ -22,10 +22,8 @@ public abstract class Product implements Serializable {
     }
 
     /**
-     * Information Expert Pattern (Fix V-DEV1-01):
+     * Information Expert Pattern (SRP / V-01):
      * Product manages and mutates its own stock state safely.
-     *
-     * @param quantity amount of stock to reduce
      */
     public void reduceStock(int quantity) {
         if (quantity <= 0) {
@@ -39,8 +37,6 @@ public abstract class Product implements Serializable {
 
     /**
      * Information Expert Pattern: Restores product inventory.
-     *
-     * @param quantity amount to restore
      */
     public void restoreStock(int quantity) {
         if (quantity <= 0) {
@@ -50,23 +46,18 @@ public abstract class Product implements Serializable {
     }
 
     /**
-     * Polymorphism Pattern (Fix V-DEV1-05):
+     * Polymorphism Pattern (OCP / V-07):
      * Abstract method implemented by concrete subclasses to format CSV records without instanceof checks.
-     *
-     * @return CSV formatted string line
      */
     public abstract String toCsvRecord();
 
     // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
-
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
-
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
-
     public int getStock() { return stock; }
     public void setStock(int stock) { this.stock = stock; }
 }

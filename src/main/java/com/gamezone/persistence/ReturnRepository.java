@@ -1,30 +1,31 @@
 package com.gamezone.persistence;
 
-import com.gamezone.service.ProductService;
-import com.gamezone.service.SaleService;
+import com.gamezone.model.Return;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Repository responsible for handling the persistence of Return entities
  * in a CSV file located at data/returns.csv.
  *
  * @author Desarrolladora 2
- * @version 1.0
+ * @version 2.0
  */
 public class ReturnRepository {
 
     private final String filePath = "data/returns.csv";
-    private final SaleService saleService;
-    private final ProductService productService;
 
     /**
-     * Constructs a new ReturnRepository with the required dependency services.
-     *
-     * @code saleService the service used to handle sales operations and retrieve related sales
-     * @code productService the service used to handle product inventory operations
+     * Constructs a new ReturnRepository without high-level service dependencies.
      */
-    public ReturnRepository(SaleService saleService, ProductService productService) {
-        this.saleService = saleService;
-        this.productService = productService;
+    public ReturnRepository() {
+        // Persistence layer is decoupled from business services (DIP Fix - V-01)
     }
 
     /**
@@ -32,23 +33,20 @@ public class ReturnRepository {
      *
      * @return a list of all registered returns, or an empty list if the file does not exist.
      */
-    public java.util.List<com.gamezone.model.Return> loadAll() {
-        java.util.List<com.gamezone.model.Return> returns = new java.util.ArrayList<>();
-        java.io.File file = new java.io.File(filePath);
-
+    public List<Return> loadAll() {
+        List<Return> returns = new ArrayList<>();
+        File file = new File(filePath);
         if (!file.exists()) {
             return returns;
         }
-
-        try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                // TODO: Implement parsing logic from CSV row to Return object using saleService and productService
+                // TODO: Implement parsing logic from CSV row to Return object if required
             }
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             System.err.println("Error reading returns data: " + e.getMessage());
         }
-
         return returns;
     }
 
@@ -57,13 +55,12 @@ public class ReturnRepository {
      *
      * @param returns the list of Return objects to be persisted.
      */
-    public void saveAll(java.util.List<com.gamezone.model.Return> returns) {
-        try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(filePath))) {
-            for (com.gamezone.model.Return ret : returns) {
-                // TODO: Implement conversion logic from Return object to CSV line format
+    public void saveAll(List<Return> returns) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
+            for (Return ret : returns) {
                 writer.println(ret.toString());
             }
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             System.err.println("Error writing returns data: " + e.getMessage());
         }
     }

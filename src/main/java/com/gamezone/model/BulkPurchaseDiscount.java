@@ -13,12 +13,12 @@ public class BulkPurchaseDiscount extends Promotion {
     /**
      * Constructs a new BulkPurchaseDiscount with the specified details.
      *
-     * @        The promotion identifier.
-     * @param name      The promotion name.
-     * @param startDate The start date of the promotion.
-     * @param endDate   The end date of the promotion.
-     * @param percentage The discount percentage to apply.
+     * @param name        The promotion name.
+     * @param startDate   The start date of the promotion.
+     * @param endDate     The end date of the promotion.
+     * @param percentage  The discount percentage to apply.
      * @param minQuantity The minimum quantity of products required for the discount.
+     * @ The promotion identifier.
      */
     public BulkPurchaseDiscount(String id, String name, LocalDate startDate, LocalDate endDate, double percentage, int minQuantity) {
         super(id, name, startDate, endDate);
@@ -70,12 +70,17 @@ public class BulkPurchaseDiscount extends Promotion {
      */
     @Override
     public double calculateDiscount(Sale sale) {
-        if (sale == null || sale.getProducts() == null) {
+        if (sale == null || sale.getItems() == null) {
             return 0.0;
         }
 
-        // Counts the total quantity of products in the sale's product list
-        int totalQuantity = sale.getProducts().size();
+        // Suma la cantidad total de unidades vendidas considerando cada SaleItem
+        int totalQuantity = 0;
+        for (SaleItem item : sale.getItems()) {
+            if (item != null) {
+                totalQuantity += item.getQuantity();
+            }
+        }
 
         if (totalQuantity >= minQuantity) {
             return sale.getTotalAmount() * (percentage / 100.0);

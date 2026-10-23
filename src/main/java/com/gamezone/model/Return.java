@@ -1,22 +1,27 @@
 package com.gamezone.model;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
 /**
  * Class representing a product return transaction.
  * Calculates proportional refund amounts when discounts were applied to the original sale.
+ * Implements Serializable for binary/file repository persistence.
  *
  * @author Miguel Vasquez
- * @version 1.2
+ * @version 1.3
  */
-public class Return {
+public class Return implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private String id;
     private Sale sale;
     private List<Product> returnedItems;
     private String reason;
     private LocalDate returnDate;
-    private double refundAmount;
+    double refundAmount;
 
     /**
      * Constructs a Return instance and calculates the proportional refund amount.
@@ -71,11 +76,11 @@ public class Return {
             return 0.0;
         }
 
-        // Calculate original items subtotal
+        // Subtotal de los items de la venta original usando SaleItem
         double saleSubtotal = 0.0;
-        if (sale.getProducts() != null) {
-            for (Product p : sale.getProducts()) {
-                saleSubtotal += p.getPrice();
+        if (sale.getItems() != null) {
+            for (SaleItem item : sale.getItems()) {
+                saleSubtotal += item.getSubtotal();
             }
         }
 
@@ -116,9 +121,9 @@ public class Return {
         sb.append("RETURNED ITEMS:\n");
 
         double saleSubtotal = 0.0;
-        if (sale != null && sale.getProducts() != null) {
-            for (Product p : sale.getProducts()) {
-                saleSubtotal += p.getPrice();
+        if (sale != null && sale.getItems() != null) {
+            for (SaleItem item : sale.getItems()) {
+                saleSubtotal += item.getSubtotal();
             }
         }
 

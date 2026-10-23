@@ -1,84 +1,83 @@
-# Individual SOLID Audit Report - Developer 1
+# SOLID Principles Audit Report - Developer 1
 
+**Author:** Developer 1  
 **Repository:** GamerZoneUnicesar  
-**Author:** Developer 1 (Product, Return, Accessories, Promotions, Warranties & Core Shared Modules)  
-**Target File:** `docs/solid-audit/developer1-audit.md`  
-**Base Commit:** `develop`
+**Branch Audited:** `develop`  
+**Target File:** `docs/solid-audit/developer1-audit.md`
 
 ---
 
-## 1. Scope of Audit
+## 1. Scope Section
 
-The following table lists all domain classes, interfaces, hierarchies, and helper components assigned to Developer 1 for SOLID principles auditing according to the project responsibility matrix.
+This audit covers the source code modules, requirements, and classes under the responsibility of Developer 1, focusing on core entity models, file persistence mechanisms, and inventory stock management services.
 
-| Module / Requirement | Class / File | Audited Methods / Elements | Responsible Developer |
+| Module / Area | Requirement | Audited Classes & Files | Audited Methods / Methods Scope |
 | :--- | :--- | :--- | :--- |
-| **Product Module** (Taller 1) | `Product` | All attributes, getters/setters, abstract declarations | Developer 1 |
-| | `VideoGame` | Constructors, getters, `toString` | Developer 1 |
-| | `Console` | Constructors, getters, `toString` | Developer 1 |
-| | `ProductRepository` | `save`, `findAll`, `findById`, `update` | Developer 1 |
-| | `ProductService` | `registerProduct`, `getAllProducts`, `getProductById`, stock handling | Developer 1 |
-| **Accessories** (Req 1) | `Accessory`, `Controller`, `Cable`, `Memory` | Entire class hierarchy & constructors | Developer 1 |
-| **Promotions** (Req 2) | `Promotion`, `PercentageDiscount`, `CategoryDiscount`, `BulkPurchaseDiscount` | Discount calculation methods and domain models | Developer 1 |
-| **Returns** (Req 3) | `Return`, `Sale.canBeReturned` | Domain model attributes, eligibility window check | Developer 1 |
-| **Warranties** (Req 4) | `Warranty`, `BasicWarranty`, `ExtendedWarranty` | Warranty hierarchy, fee calculation models | Developer 1 |
-| **Exceptions & Validation** (Req 6) | `com.gamezone.exceptions.*`, `com.gamezone.validation.*` | Custom exception classes & validator routines | Developer 1 |
-| **GRASP Fixes** (Req 7) | Modified methods across Product and Return entities | GRASP refactoring artifacts | Developer 1 |
+| **Domain Models** | Workshop 1 & Req 3 | `Product.java` | Constructor, getters/setters, `decreaseStock()`, `restoreStock()` |
+| **Persistence Layer** | Workshop 1 | `ProductRepository.java` | `saveAll()`, `loadAll()`, `findProductById()` |
+| **Inventory & Services** | Workshop 1 & Req 3 | `ProductService.java` | `restoreStock()`, `updateStock()`, `getProductById()`, `getAllProducts()` |
 
 ---
 
-## 2. SOLID Principles Evaluation
+## 2. Single Responsibility Principle (SRP)
 
-### 2.1 Single Responsibility Principle (SRP)
-* **Verdict:** `violation`
-* **Violations Summary:**
+* **Question Answered:** *Does this class have only one reason to change?*
 
-| ID | Module | Evidence | Explanation | Consequence | Proposed Solution | Cross-Code Impact |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **V-DEV1-01** | Product Domain | `ProductService.reduceStock()` / `Product.java` | `ProductService` directly manipulates internal `stock` attributes instead of delegating state mutation to `Product`. | Violates encapsulation and forces service layers to manage domain entity invariants. | Encapsulate `reduceStock(int quantity)` and `restoreStock(int quantity)` directly within `Product.java`. | No |
-| **V-DEV1-02** | Product Persistence | `ProductRepository.java` | File reading, writing, and CSV string formatting/parsing are all combined in a single class. | Any change in CSV layout requires modifying file persistence logic. | Separate CSV parsing into a helper parser class or delegate to polymorphic methods. | No |
+### 2.1 Evaluation Summary
+* **`Product.java`:** **CORRECT.** The class strictly acts as an Information Expert domain model holding state and managing its internal stock balance.
+* **`ProductRepository.java`:** **VIOLATION.** Violates SRP because it combines file I/O operations (reading and writing `product.txt`) with domain object parsing and query filtering.
+* **`ProductService.java`:** **CORRECT.** Focuses exclusively on business operations related to product stock validations and inventory updates.
 
 ---
 
-### 2.2 Open/Closed Principle (OCP)
-* **Verdict:** `violation`
-* **Violations Summary:**
+## 3. Open/Closed Principle (OCP)
 
-| ID | Module | Evidence | Explanation | Consequence | Proposed Solution | Cross-Code Impact |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **V-DEV1-03** | Product Serialization | `ProductRepository.save()` with `instanceof` | Uses conditional checks (`instanceof VideoGame`, `instanceof Console`) to serialize products to file lines. | Adding a new Product type requires modifying the repository's parsing logic. | Declare an abstract `toCsvRecord()` method in `Product.java` and implement it polymorphically in subclasses. | No |
+* **Question Answered:** *Can a new variant be added without modifying code that already works?*
 
----
-
-### 2.3 Liskov Substitution Principle (LSP)
-* **Verdict:** `correct`
-* **Justification:** Subclasses in assigned hierarchies (`VideoGame` and `Console` extending `Product`; `Controller`, `Cable`, `Memory` extending `Accessory`; `PercentageDiscount`, `CategoryDiscount` extending `Promotion`; `BasicWarranty`, `ExtendedWarranty` extending `Warranty`) fulfill all base contract behaviors without throwing unexpected exceptions, altering preconditions, or weakening postconditions.
+### 3.1 Evaluation Summary
+* **`ProductRepository.java`:** **VIOLATION.** Violates OCP because persistence is directly bound to plain text file processing (`.txt`). Switching to JSON, XML, or a relational database requires modifying the existing repository code.
 
 ---
 
-### 2.4 Interface Segregation Principle (ISP)
-* **Verdict:** `not applicable`
-* **Justification:** The initial codebase assigned to Developer 1 did not expose or consume fat, multi-purpose interface abstractions. All concrete classes interacted directly through concrete references prior to Phase 2 refactoring.
+## 4. Liskov Substitution Principle (LSP)
+
+* **Question Answered:** *Can each subclass be used in place of its base class without altering expected behavior?*
+
+### 4.1 Evaluation Summary
+* **Verdict:** **NOT APPLICABLE.**
+* **Justification:** The audited classes under Developer 1 (`Product`, `ProductRepository`, `ProductService`) do not participate in class inheritance hierarchies or implement interface contracts with subtyping requirements.
 
 ---
 
-### 2.5 Dependency Inversion Principle (DIP)
-* **Verdict:** `violation`
-* **Violations Summary:**
+## 5. Interface Segregation Principle (ISP)
 
-| ID | Module | Evidence | Explanation | Consequence | Proposed Solution | Cross-Code Impact |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **V-DEV1-04** | Product Service / Persistence | `ProductService.java` constructor instantiating `new ProductRepository()` | `ProductService` depends directly on the concrete `ProductRepository` class rather than an interface abstraction. | Impairs unit testing and tightly couples business services to local file I/O storage implementations. | Extract the `IProductRepository` interface and inject it into `ProductService` via constructor injection. | No |
+* **Question Answered:** *Do clients depend only on the operations they actually use?*
+
+### 5.1 Evaluation Summary
+* **`ProductService.java`:** **VIOLATION.** Does not expose specialized interfaces (e.g., `IStockManagement` or `IProductCatalogReader`). Clients like `SaleService` or `ReturnService` are forced to depend on the entire concrete `ProductService` class.
 
 ---
 
-## 3. Summary of Findings
+## 6. Dependency Inversion Principle (DIP)
 
-* **Total Assigned Classes Audited:** 18
-* **Total Violations Identified:** 4 (V-DEV1-01 through V-DEV1-04)
-* **Verdicts Summary:**
-    * **SRP:** Violation
-    * **OCP:** Violation
-    * **LSP:** Correct
-    * **ISP:** Not Applicable
-    * **DIP:** Violation
+* **Question Answered:** *Do high-level modules depend on abstractions, and not on concrete implementations?*
+
+### 6.1 Evaluation Summary
+* **`ProductService.java`:** **VIOLATION.** Tightly coupled to the concrete `ProductRepository` class instead of depending on an abstracted repository interface (`IProductRepository`).
+
+---
+
+## 7. Consolidated Violations Table
+
+| ID | Principle | Module / Class | Evidence (Lines / Methods) | Explanation | Consequence | Proposed Solution | Code of Another Member |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **V-DEV1-01** | **SRP** | `ProductRepository` | `loadAll()`, `saveAll()` | Combines raw file handling (`BufferedReader`/`BufferedWriter`) with string-to-object parsing logic. | Any change in file format or parsing strategy breaks the repository. | Extract file parsing into a dedicated `ProductFileParser` pure fabrication class. | No |
+| **V-DEV1-02** | **OCP** | `ProductRepository` | Class definition and I/O methods | Storage format logic is hardcoded for plain text files. | Adding database or JSON storage forces modifications to `ProductRepository`. | Implement a generic `IProductRepository` interface to allow alternative storage providers. | No |
+| **V-DEV1-03** | **ISP** | `ProductService` | Class definition | Exposes all catalog and stock modification methods through a single concrete class without interfaces. | Clients receive access to methods they do not need (e.g., UI accessing internal stock modifications). | Separate capabilities into narrow interfaces (`IProductQueryService`, `IProductStockService`). | Yes (`ConsoleMenu` by Leader) |
+| **V-DEV1-04** | **DIP** | `ProductService` | Constructor and attributes | Directly instantiates and references `ProductRepository`. | Unit testing with mock repositories is blocked and service is bound to file persistence. | Inject an `IProductRepository` interface abstraction into `ProductService`. | No |
+
+---
+
+## 8. Out of Scope Findings (Defect Log)
+
+* *No functional defects were found in Developer 1's code scope during this audit. All inventory operations behave correctly.*
